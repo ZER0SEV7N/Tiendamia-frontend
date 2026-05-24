@@ -83,7 +83,7 @@ export default function CarritoPage() {
 
         {/* COLUMNA DERECHA: Resumen importado */}
         <div className="space-y-6">
-          <ResumenCompra carrito={carrito} />
+          <ResumenCompra carrito={carrito} /> 
         </div>
       </div>
     </div>
