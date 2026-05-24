@@ -14,14 +14,14 @@ function SideBar() {
       {/* Contenedor principal centrado que junta los elementos hacia el medio */}
       <div className="max-w-6xl mx-auto flex items-center justify-center gap-10">
         {/* LOGO TIENDAMIA */}
-        <div className="flex items-center shrink-0">
+        <Link href="/" className="flex items-center shrink-0 group">
           <div className="flex flex-col items-center cursor-pointer select-none">
-            <span className="text-2xl font-black tracking-tight text-white font-sans">
+            <span className="text-2xl font-black tracking-tight text-white font-sans px-4 py-2 rounded-md transition-colors group-hover:bg-white/10">
               tienda<span className="text-white font-extrabold">mia</span>
             </span>
-            <div className="w-14 h-1 bg-[#7000FF] rounded-full -mt-1 self-end mr-1" />
+            <div className="w-14 h-1 bg-[#7000FF] rounded-full -mt-1 self-end mr-5" />
           </div>
-        </div>
+        </Link>
 
         {/* BARRA DE BÚSQUEDA */}
         <div className="flex flex-1 max-w-xl bg-white rounded-md overflow-hidden shadow-sm h-10 items-center">
@@ -52,7 +52,7 @@ function SideBar() {
             variant="link"
             className="text-white p-0 h-auto hover:no-underline hover:opacity-90 transition-opacity cursor-pointer flex items-center justify-center"
           >
-            <Heart className="h-6 w-6 stroke-[2]" />
+            <Heart className="h-6 w-6 stroke-2" />
           </Button>
 
           {/* BOTÓN REGÍSTRATE */}
@@ -70,11 +70,7 @@ function SideBar() {
           <HoverCard openDelay={0} closeDelay={150}>
             <HoverCardTrigger asChild>
               <button className="text-white bg-transparent border-none hover:no-underline flex items-center gap-2 font-medium p-1 h-auto cursor-pointer text-[14px] focus:outline-none">
-                {/* Ícono de usuario al lado del nombre */}
-                <div className="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold">
-                  U
-                </div>
-                <span>Edson Leonardo Rojas Cabia</span>
+                <span>Mi Cuenta</span>
                 <ChevronDown className="h-4 w-4" />
               </button>
             </HoverCardTrigger>
@@ -84,7 +80,7 @@ function SideBar() {
               side="bottom"
               sideOffset={14}
               avoidCollisions={false}
-              className="w-64 p-4 flex flex-col gap-3 bg-white rounded-md shadow-xl border border-neutral-100 z-[9999]"
+              className="w-64 p-4 flex flex-col gap-3 bg-white rounded-md shadow-xl border border-neutral-100 z-9999"
             >
               <Button
                 variant="outline"
@@ -102,9 +98,11 @@ function SideBar() {
                 <div className="grow border-t border-neutral-200"></div>
               </div>
 
-              <Button className="w-full bg-[#FF4141] hover:bg-[#E53A3A] text-white font-medium h-9 text-sm rounded-md shadow-sm transition-colors">
-                Ingresar
-              </Button>
+              <Link href="/registro">
+                <Button className="w-full bg-[#FF4141] hover:bg-[#E53A3A] text-white font-medium h-9 text-sm rounded-md shadow-sm transition-colors">
+                  Ingresar
+                </Button>
+              </Link>
             </HoverCardContent>
           </HoverCard>
 
@@ -113,7 +111,7 @@ function SideBar() {
             <HoverCardTrigger asChild>
               <button className="text-white bg-transparent border-none hover:no-underline p-1 h-auto relative flex items-center justify-center cursor-pointer focus:outline-none">
                 <span className="relative inline-block">
-                  <ShoppingCart className="h-6 w-6 text-white stroke-[2]" />
+                  <ShoppingCart className="h-6 w-6 text-white stroke-2" />
                   <span className="absolute -top-1.5 -right-1 bg-[#FF3C3C] text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-[#FF3C3C]">
                     0
                   </span>
@@ -126,7 +124,7 @@ function SideBar() {
               side="bottom"
               sideOffset={14}
               avoidCollisions={false}
-              className="w-80 py-8 px-6 bg-white rounded-md shadow-xl border border-neutral-100 flex items-center justify-center relative z-[9999]"
+              className="w-80 py-8 px-6 bg-white rounded-md shadow-xl border border-neutral-100 flex items-center justify-center relative z-9999"
             >
               <div className="absolute -top-2 right-4 w-4 h-4 bg-white rotate-45 border-l border-t border-neutral-100 shadow-[-2px_-2px_3px_rgba(0,0,0,0.02)]" />
 
