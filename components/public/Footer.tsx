@@ -6,7 +6,8 @@ import {
   SiX,
   SiYoutube,
 } from "@icons-pack/react-simple-icons";
-import { Button } from "./ui/button";
+
+import { Button } from "../ui/button";
 
 function Footer() {
   return (

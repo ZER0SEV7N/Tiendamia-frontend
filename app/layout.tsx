@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Mulish } from "next/font/google";
-import Footer from "@/components/Footer";
+import Footer from "@/components/public/Footer";
 import "./globals.css";
+import SideBar from "@/components/public/SideBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +36,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${mulish.className} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <header>Sidebar en Progreso</header>
+        <SideBar />
         {children}
         <Footer />
       </body>
