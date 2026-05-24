@@ -20,7 +20,7 @@ export const useCarrito = () => {
     const obtenerCarrito = useCallback(async () => {
         setIsLoading(true);
         try{
-            const { data } = await api.get<response<carrito>>('/carrito');
+            const { data } = api.get<response<carrito>>('/api/carrito');
             setCarritoState(data.data);
         }catch (error: any){
             setError(error.response?.data?.message || 'Error al obtener el carrito');

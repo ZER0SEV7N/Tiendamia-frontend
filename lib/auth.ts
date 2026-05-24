@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080";
+import api from '@/lib/api';
 
 export interface AuthResponse {
   token: string;
@@ -37,13 +37,7 @@ export function estaLogueado(): boolean {
 
 // Login
 export async function login(correo: string, password: string): Promise<AuthResponse> {
-  const res = await fetch(`${API_URL}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ correo, password }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Error al iniciar sesión");
+  const { data } = await api.post<AuthResponse>('/auth/login', { correo, password });
   guardarSesion(data);
   return data;
 }
@@ -56,37 +50,21 @@ export async function register(
   telefono: string,
   password: string
 ): Promise<AuthResponse> {
-  const res = await fetch(`${API_URL}/auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ nombres, apellidos, correo, telefono, password }),
+  const { data } = await api.post<AuthResponse>('/auth/register', {
+    nombres, apellidos, correo, telefono, password,
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Error al registrarse");
   guardarSesion(data);
   return data;
 }
 
 // Recuperar password — envía email
 export async function solicitarRecuperacion(correo: string): Promise<string> {
-  const res = await fetch(`${API_URL}/auth/recuperar-password`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ correo }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Error al enviar el correo");
+  const { data } = await api.post<{ mensaje: string }>('/auth/recuperar-password', { correo });
   return data.mensaje;
 }
 
 // Cambiar password con token del email
 export async function cambiarPassword(token: string, nuevaPassword: string): Promise<string> {
-  const res = await fetch(`${API_URL}/auth/cambiar-password`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token, nuevaPassword }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Error al cambiar la contraseña");
+  const { data } = await api.post<{ mensaje: string }>('/auth/cambiar-password', { token, nuevaPassword });
   return data.mensaje;
 }
