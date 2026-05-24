@@ -1,12 +1,14 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function RegistroPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     nombres: "",
     apellidos: "",
@@ -18,8 +20,12 @@ export default function RegistroPage() {
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Datos de registro temporales:", formData);
-    alert("¡Registro simulado en el frontend! Datos listos para enviar a Spring Boot.");
+    
+    // Aquí se simula el éxito del registro / inicio de sesión
+    console.log("Registrando usuario...", formData);
+    
+    // 👈 REDIRECCIÓN AUTOMÁTICA: Nos manda directo a la raíz del perfil
+    router.push("/perfil");
   };
 
   return (

@@ -69,8 +69,12 @@ function SideBar() {
           {/* Añadimos de manera nativa propiedades de control de Radix para forzar el render */}
           <HoverCard openDelay={0} closeDelay={150}>
             <HoverCardTrigger asChild>
-              <button className="text-white bg-transparent border-none hover:no-underline flex items-center gap-1 font-medium p-1 h-auto cursor-pointer text-[15px] focus:outline-none">
-                <span>Mi cuenta</span>
+              <button className="text-white bg-transparent border-none hover:no-underline flex items-center gap-2 font-medium p-1 h-auto cursor-pointer text-[14px] focus:outline-none">
+                {/* Ícono de usuario al lado del nombre */}
+                <div className="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold">
+                  U
+                </div>
+                <span>Edson Leonardo Rojas Cabia</span>
                 <ChevronDown className="h-4 w-4" />
               </button>
             </HoverCardTrigger>
