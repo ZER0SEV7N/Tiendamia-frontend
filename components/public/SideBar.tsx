@@ -78,7 +78,7 @@ function SideBar() {
             </span>
           ) : (
             <Link
-              href="/register"
+              href="/auth/register"
               className="text-white text-[15px] font-medium hover:opacity-90 transition-opacity"
             >
               Regístrate
@@ -144,7 +144,7 @@ function SideBar() {
                   </div>
 
                   <Link
-                    href="/login"
+                    href="/auth/login"
                     className="w-full text-center bg-[#FF4141] hover:bg-[#E53A3A] text-white font-medium h-9 text-sm rounded-md shadow-sm transition-colors flex items-center justify-center"
                   >
                     Ingresar
