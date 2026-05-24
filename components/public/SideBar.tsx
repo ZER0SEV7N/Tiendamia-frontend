@@ -6,6 +6,7 @@ import {
 import { Button } from "../ui/button";
 import { ChevronDown, ShoppingCart, Heart, Search } from "lucide-react";
 import { SiGoogle } from "@icons-pack/react-simple-icons";
+import Link from "next/link";
 
 function SideBar() {
   return (
@@ -55,12 +56,14 @@ function SideBar() {
           </Button>
 
           {/* BOTÓN REGÍSTRATE */}
-          <Button
-            variant="link"
-            className="text-white p-0 h-auto font-medium hover:no-underline hover:opacity-90 transition-opacity cursor-pointer text-[15px]"
-          >
-            Regístrate
-          </Button>
+          <Link href="/registro" passHref>
+            <Button
+              variant="link"
+              className="text-white p-0 h-auto font-medium hover:no-underline hover:opacity-90 transition-opacity cursor-pointer text-[15px]"
+            >
+              Regístrate
+            </Button>
+          </Link>
 
           {/* HOVER CARD: MI CUENTA */}
           {/* Añadimos de manera nativa propiedades de control de Radix para forzar el render */}
