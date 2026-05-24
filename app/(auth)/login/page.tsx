@@ -27,10 +27,14 @@ export default function LoginPage() {
     try {
       await login(correo, password);
       router.push("/");
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Error al iniciar sesión");
-    } finally {
-      setCargando(false);
+      router.refresh();
+    } catch (err: any) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response: { data: { error?: string } } };
+        setError(axiosErr.response?.data?.error || "Error al iniciar sesión");
+      }else {
+        setError("Error al iniciar sesión");
+      }
     }
   };
 
