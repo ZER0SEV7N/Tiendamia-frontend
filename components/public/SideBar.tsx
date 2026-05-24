@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import {
@@ -9,12 +10,9 @@ import { Button } from "../ui/button";
 import { ChevronDown, ShoppingCart, Heart, Search } from "lucide-react";
 import { SiGoogle } from "@icons-pack/react-simple-icons";
 import Link from "next/link";
-<<<<<<< HEAD
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { obtenerUsuario, cerrarSesion } from "@/lib/auth";
-=======
->>>>>>> origin/edson
 
 function SideBar() {
   const router = useRouter();
@@ -66,18 +64,6 @@ function SideBar() {
             <Heart className="h-6 w-6 stroke-[2]" />
           </Button>
 
-<<<<<<< HEAD
-          {/* REGÍSTRATE o nombre del usuario */}
-          {usuario ? (
-            <span className="text-white text-[15px] font-medium">
-              Hola, {usuario.nombres?.split(" ")?.[0] ?? usuario.correo}
-            </span>
-          ) : (
-            <Link href="/register" className="text-white text-[15px] font-medium hover:opacity-90 transition-opacity">
-              Regístrate
-            </Link>
-          )}
-=======
           {/* BOTÓN REGÍSTRATE */}
           <Link href="/registro" passHref>
             <Button
@@ -87,22 +73,16 @@ function SideBar() {
               Regístrate
             </Button>
           </Link>
->>>>>>> origin/edson
 
           {/* MI CUENTA */}
           <HoverCard openDelay={0} closeDelay={150}>
             <HoverCardTrigger asChild>
-<<<<<<< HEAD
-              <button className="text-white bg-transparent border-none flex items-center gap-1 font-medium p-1 h-auto cursor-pointer text-[15px] focus:outline-none">
-                <span>Mi cuenta</span>
-=======
               <button className="text-white bg-transparent border-none hover:no-underline flex items-center gap-2 font-medium p-1 h-auto cursor-pointer text-[14px] focus:outline-none">
                 {/* Ícono de usuario al lado del nombre */}
                 <div className="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold">
                   U
                 </div>
                 <span>Edson Leonardo Rojas Cabia</span>
->>>>>>> origin/edson
                 <ChevronDown className="h-4 w-4" />
               </button>
             </HoverCardTrigger>

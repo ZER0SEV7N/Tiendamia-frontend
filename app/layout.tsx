@@ -1,12 +1,9 @@
 "use client";
 
 import { Geist, Geist_Mono, Mulish } from "next/font/google";
-<<<<<<< HEAD
-=======
 import { usePathname } from "next/navigation"; 
 import Footer from "@/components/public/Footer";
 import SideBar from "@/components/public/SideBar";
->>>>>>> origin/edson
 import "./globals.css";
 
 const geistSans = Geist({
@@ -38,10 +35,6 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${mulish.className} h-full antialiased`}
     >
-<<<<<<< HEAD
-      <body className="min-h-full flex flex-col">
-        {children}
-=======
       <body className="min-h-full flex flex-col bg-gray-50">
         
         {/* CONDICIONAL PARA EL HEADER / NAVBAR */}
@@ -74,7 +67,6 @@ export default function RootLayout({
           <Footer />
         )}
 
->>>>>>> origin/edson
       </body>
     </html>
   );
