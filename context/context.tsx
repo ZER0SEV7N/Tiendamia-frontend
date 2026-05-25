@@ -127,6 +127,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Hook personalizado para usar el contexto fácilmente
+//Unir repositorio
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (context === undefined) 
