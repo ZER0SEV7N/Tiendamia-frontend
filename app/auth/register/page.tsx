@@ -36,10 +36,14 @@ export default function RegisterPage() {
     try {
       await register(form.nombres, form.apellidos, form.correo, form.telefono, form.password);
       router.push("/");
+      router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Error al registrarse");
-    } finally {
-      setCargando(false);
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response: { data: { error?: string } } };
+        setError(axiosErr.response?.data?.error || "Error al registrarse");
+      } else {
+        setError("Error al registrarse");
+      }
     }
   };
 

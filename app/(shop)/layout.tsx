@@ -1,27 +1,43 @@
-import React from "react";
-import ProfileSidebar from "@/components/ProfileSidebar";
+"use client";
 
-export default function PerfilLayout({
+import { Geist, Geist_Mono, Mulish } from "next/font/google";
+import Footer from "@/components/public/Footer";
+import SideBar from "@/components/public/SideBar";
+import "@/app/globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const mulish = Mulish({
+  variable: "--font-mulish",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <div className="min-h-screen bg-gray-50/50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Grid de dos columnas: Menú a la izquierda, Contenido a la derecha */}
-        <div className="flex flex-col md:flex-row gap-8">
-          
-          {/* El menú de la izquierda se mantiene FIJO en cualquier pestaña del perfil */}
-          <ProfileSidebar />
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} ${mulish.className} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col bg-gray-50">
+        <SideBar />
 
-          {/* El children cambiará dinámicamente según la subruta */}
-          <main className="flex-1">
-            {children}
-          </main>
-          
-        </div>
-      </div>
-    </div>
+        <main className="grow flex flex-col">{children}</main>
+
+        <Footer />
+      </body>
+    </html>
   );
-}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+}

@@ -16,9 +16,13 @@ import { obtenerUsuario, cerrarSesion } from "@/lib/auth";
 
 function SideBar() {
   const router = useRouter();
-  const [usuario, setUsuario] = useState<{ nombres: string; correo: string } | null>(null);
+  const [usuario, setUsuario] = useState<{
+    nombres: string;
+    correo: string;
+  } | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setUsuario(obtenerUsuario());
   }, []);
 
@@ -31,9 +35,11 @@ function SideBar() {
   return (
     <header className="w-full bg-[#FF3C3C] text-white px-4 py-3 shadow-md">
       <div className="max-w-6xl mx-auto flex items-center justify-center gap-10">
-
         {/* LOGO */}
-        <Link href="/" className="flex flex-col items-center cursor-pointer select-none shrink-0">
+        <Link
+          href="/"
+          className="flex flex-col items-center cursor-pointer select-none shrink-0"
+        >
           <span className="text-2xl font-black tracking-tight text-white font-sans">
             tienda<span className="text-white font-extrabold">mia</span>
           </span>
@@ -58,46 +64,63 @@ function SideBar() {
 
         {/* BOTONES */}
         <div className="relative z-50 flex items-center gap-6 text-sm font-medium shrink-0">
-
           {/* FAVORITOS */}
-          <Button variant="link" className="text-white p-0 h-auto hover:no-underline hover:opacity-90 cursor-pointer">
+          <Button
+            variant="link"
+            className="text-white p-0 h-auto hover:no-underline hover:opacity-90 cursor-pointer"
+          >
             <Heart className="h-6 w-6 stroke-[2]" />
           </Button>
 
-          {/* BOTÓN REGÍSTRATE */}
-          <Link href="/registro" passHref>
-            <Button
-              variant="link"
-              className="text-white p-0 h-auto font-medium hover:no-underline hover:opacity-90 transition-opacity cursor-pointer text-[15px]"
+          {/* REGÍSTRATE o nombre del usuario */}
+          {usuario ? (
+            <span className="text-white text-[15px] font-medium">
+              Hola, {usuario.nombres?.split(" ")?.[0] ?? usuario.correo}
+            </span>
+          ) : (
+            <Link
+              href="/auth/register"
+              className="text-white text-[15px] font-medium hover:opacity-90 transition-opacity"
             >
               Regístrate
-            </Button>
-          </Link>
+            </Link>
+          )}
 
           {/* MI CUENTA */}
           <HoverCard openDelay={0} closeDelay={150}>
             <HoverCardTrigger asChild>
-              <button className="text-white bg-transparent border-none hover:no-underline flex items-center gap-2 font-medium p-1 h-auto cursor-pointer text-[14px] focus:outline-none">
-                {/* Ícono de usuario al lado del nombre */}
-                <div className="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold">
-                  U
-                </div>
-                <span>Edson Leonardo Rojas Cabia</span>
+              <button className="text-white bg-transparent border-none flex items-center gap-1 font-medium p-1 h-auto cursor-pointer text-[15px] focus:outline-none">
+                <span>Mi cuenta</span>
                 <ChevronDown className="h-4 w-4" />
               </button>
             </HoverCardTrigger>
 
             <HoverCardContent
-              align="center" side="bottom" sideOffset={14} avoidCollisions={false}
+              align="center"
+              side="bottom"
+              sideOffset={14}
+              avoidCollisions={false}
               className="w-64 p-4 flex flex-col gap-3 bg-white rounded-md shadow-xl border border-neutral-100 z-[9999]"
             >
               {usuario ? (
                 // Usuario logueado
                 <>
-                  <p className="text-sm text-gray-600 font-medium truncate">{usuario.correo}</p>
+                  <p className="text-sm text-gray-600 font-medium truncate">
+                    {usuario.correo}
+                  </p>
                   <hr className="border-neutral-200" />
-                  <Link href="/perfil" className="text-sm text-gray-700 hover:text-black transition">Mi perfil</Link>
-                  <Link href="/mis-pedidos" className="text-sm text-gray-700 hover:text-black transition">Mis pedidos</Link>
+                  <Link
+                    href="/perfil"
+                    className="text-sm text-gray-700 hover:text-black transition"
+                  >
+                    Mi perfil
+                  </Link>
+                  <Link
+                    href="/mis-pedidos"
+                    className="text-sm text-gray-700 hover:text-black transition"
+                  >
+                    Mis pedidos
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full text-left text-sm text-red-500 hover:text-red-600 transition"
@@ -115,12 +138,14 @@ function SideBar() {
 
                   <div className="relative flex py-0.5 items-center">
                     <div className="grow border-t border-neutral-200"></div>
-                    <span className="shrink mx-2 text-neutral-400 text-xs font-light">o ingresa con tu email</span>
+                    <span className="shrink mx-2 text-neutral-400 text-xs font-light">
+                      o ingresa con tu email
+                    </span>
                     <div className="grow border-t border-neutral-200"></div>
                   </div>
 
                   <Link
-                    href="/login"
+                    href="/auth/login"
                     className="w-full text-center bg-[#FF4141] hover:bg-[#E53A3A] text-white font-medium h-9 text-sm rounded-md shadow-sm transition-colors flex items-center justify-center"
                   >
                     Ingresar
@@ -135,7 +160,7 @@ function SideBar() {
             <HoverCardTrigger asChild>
               <button className="text-white bg-transparent border-none p-1 h-auto relative flex items-center justify-center cursor-pointer focus:outline-none">
                 <span className="relative inline-block">
-                  <ShoppingCart className="h-6 w-6 text-white stroke-[2]" />
+                  <ShoppingCart className="h-6 w-6 text-white stroke-2" />
                   <span className="absolute -top-1.5 -right-1 bg-[#FF3C3C] text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-[#FF3C3C]">
                     0
                   </span>
@@ -143,7 +168,10 @@ function SideBar() {
               </button>
             </HoverCardTrigger>
             <HoverCardContent
-              align="end" side="bottom" sideOffset={14} avoidCollisions={false}
+              align="end"
+              side="bottom"
+              sideOffset={14}
+              avoidCollisions={false}
               className="w-80 py-8 px-6 bg-white rounded-md shadow-xl border border-neutral-100 flex items-center justify-center relative z-[9999]"
             >
               <div className="absolute -top-2 right-4 w-4 h-4 bg-white rotate-45 border-l border-t border-neutral-100 shadow-[-2px_-2px_3px_rgba(0,0,0,0.02)]" />
@@ -152,7 +180,6 @@ function SideBar() {
               </p>
             </HoverCardContent>
           </HoverCard>
-
         </div>
       </div>
     </header>
