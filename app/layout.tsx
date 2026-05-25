@@ -4,6 +4,7 @@ import { Geist, Geist_Mono, Mulish } from "next/font/google";
 import { usePathname } from "next/navigation"; 
 import Footer from "@/components/public/Footer";
 import SideBar from "@/components/public/SideBar";
+import { AuthProvider } from "@/context/context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -55,7 +56,9 @@ export default function RootLayout({
 
         {/* CONTENEDOR PRINCIPAL */}
         <main className="flex-grow flex flex-col">
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </main>
 
         {/* CONDICIONAL PARA EL FOOTER */}

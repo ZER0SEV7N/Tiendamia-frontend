@@ -5,12 +5,14 @@ import { CarritoVacio } from "./components/carritoVacio";
 import { ResumenCompra } from "./components/resumenCompra";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Plus, Minus } from "lucide-react";
+import { useAuth } from "@/context/context";
 import { CarritoSkeleton } from "./components/carritoSkeleton";
 
 export default function CarritoPage() {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { carritoState, isLoading, error, actualizarCantidad, eliminarItem } = useCarrito(isAuthenticated);
   
-  if (isLoading) return <CarritoSkeleton />;
+  if (authLoading || isLoading) return <CarritoSkeleton />;
   if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
   if (!carritoState || carritoState.items.length === 0) return <CarritoVacio />;
 
