@@ -1,8 +1,15 @@
 "use client";
-import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation"; // Para detectar la URL actual
-import { User, ShoppingBag, RefreshCw, MapPin, Wallet, Gift, Heart } from "lucide-react";
+import {
+  User,
+  ShoppingBag,
+  RefreshCw,
+  MapPin,
+  Wallet,
+  Gift,
+  Heart,
+} from "lucide-react";
 
 export default function ProfileSidebar() {
   const pathname = usePathname(); // Captura si estás en /perfil/direcciones, etc.
@@ -41,7 +48,9 @@ export default function ProfileSidebar() {
                   : "text-gray-600 hover:bg-gray-100"
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? "text-[#E61C24]" : "text-gray-400"}`} />
+              <Icon
+                className={`w-5 h-5 ${isActive ? "text-[#E61C24]" : "text-gray-400"}`}
+              />
               {item.name}
             </Link>
           );
