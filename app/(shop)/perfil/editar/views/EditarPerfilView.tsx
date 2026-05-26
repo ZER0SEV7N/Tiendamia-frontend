@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,17 +12,31 @@ export default function EditarPerfilView() {
 
   {/* 1. Datos simulados iniciales extraídos de image_471e06.png */}
   const [formData, setFormData] = useState({
-    nombres: "Edson Leonardo",
-    apellidos: "Rojas Cabia",
-    email: "edsonleonardorojascabia@gmail.com",
+    nombres: "",
+    apellidos: "",
+    correo: "",
     cambiarPassword: false,
   });
 
+  useEffect(() => {
+    import('@/lib/user').then(({ getProfile }) => {
+      getProfile().then((u) => {
+        setFormData({ nombres: u.nombres || '', apellidos: u.apellidos || '', correo: u.correo || '', cambiarPassword: false });
+      }).catch(() => {});
+    });
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Datos guardados con éxito:", formData);
-    // Después de guardar, regresa a la vista de lectura principal del perfil
-    router.push("/perfil");
+    const payload: any = { nombres: formData.nombres, apellidos: formData.apellidos };
+    if (formData.cambiarPassword) {
+      const nueva = window.prompt('Introduce la nueva contraseña:');
+      if (nueva) payload.password = nueva;
+    }
+
+    import('@/lib/user').then(({ updateProfile }) => {
+      updateProfile(payload).then(() => router.push('/perfil'));
+    });
   };
 
   return (

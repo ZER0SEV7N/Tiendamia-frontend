@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, HelpCircle } from "lucide-react";
+import { ArrowLeft, HelpCircle, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,14 +13,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import api from "@/lib/api";
+import { DireccionFormData } from "../../types/direccion";
 
 export default function NuevaDireccionView() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [userInfo, setUserInfo] = useState<any>(null);
 
-  // Estado del formulario con datos iniciales basados en image_547c02.png
-  const [formData, setFormData] = useState({
-    nombreCompleto: "Edson Leonardo",
-    apellidoCompleto: "Rojas Cabia",
+  // Estado del formulario
+  const [formData, setFormData] = useState<DireccionFormData>({
+    nombreCompleto: "",
+    apellidoCompleto: "",
     tipoDocumento: "",
     documento: "",
     mayorEdad: false,
@@ -33,21 +38,72 @@ export default function NuevaDireccionView() {
     telefono: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Cargar datos del usuario autenticado
+    const fetchUserInfo = async () => {
+      try {
+        const response = await api.get("/api/usuario/me");
+        setUserInfo(response.data);
+        setFormData(prev => ({
+          ...prev,
+          nombreCompleto: response.data.nombres || "",
+          apellidoCompleto: response.data.apellidos || "",
+          telefono: response.data.telefono?.replace(/\D/g, "") || "",
+        }));
+      } catch (err: any) {
+        console.error("Error cargando información del usuario:", err);
+        setError("No se pudo cargar tu información");
+      }
+    };
+    fetchUserInfo();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Dirección registrada con éxito:", formData);
-    // Te regresa automáticamente al listado de tus direcciones al guardar
-    router.push("/perfil/direcciones");
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Validar campos requeridos
+      if (!formData.direccion || !formData.departamento || !formData.provincia || !formData.distrito) {
+        setError("Por favor completa todos los campos requeridos");
+        setLoading(false);
+        return;
+      }
+
+      // Preparar datos para enviar al backend
+      const direccionData = {
+        direccion: formData.direccion,
+        distrito: formData.distrito,
+        provincia: formData.provincia,
+        departamento: formData.departamento,
+        referencia: formData.referencia || "",
+        es_principal: false,
+      };
+
+      // Enviar a la API
+      const response = await api.post("/api/usuario/direcciones", direccionData);
+      
+      console.log("Dirección guardada con éxito:", response.data);
+      
+      // Redirigir al listado de direcciones
+      router.push("/perfil/direcciones");
+    } catch (err: any) {
+      console.error("Error guardando dirección:", err);
+      setError(err.response?.data?.error || "Error al guardar la dirección. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="w-full max-w-4xl font-sans space-y-6 pl-2 pb-10 animate-fade-in">
+    <div className="w-full max-w-4xl font-sans space-y-6 pl-2 pb-10 animate-in fade-in-50 duration-500">
       
       {/* Botón Atrás */}
       <button
         type="button"
         onClick={() => router.push("/perfil/direcciones")}
-        className="flex items-center gap-2 text-sm font-semibold text-neutral-800 hover:text-black transition-colors bg-transparent border-none cursor-pointer outline-none"
+        className="flex items-center gap-2 text-sm font-semibold text-neutral-800 hover:text-black transition-colors bg-transparent border-none cursor-pointer outline-none hover:translate-x-[-4px] duration-200"
       >
         <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
         <span>Atrás</span>
@@ -57,6 +113,13 @@ export default function NuevaDireccionView() {
       <h1 className="text-3xl font-normal text-[#333333] tracking-tight">
         Agregar nueva dirección
       </h1>
+
+      {/* Mensaje de Error */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-4 animate-in shake">
+          <p className="text-red-700 text-sm font-medium">{error}</p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-8 pt-2">
         
@@ -75,7 +138,7 @@ export default function NuevaDireccionView() {
                 type="text"
                 value={formData.nombreCompleto}
                 onChange={(e) => setFormData({ ...formData, nombreCompleto: e.target.value })}
-                className="h-12 border-neutral-300 focus-visible:ring-neutral-400 bg-white rounded-md text-neutral-800"
+                className="h-12 border-neutral-300 focus-visible:ring-neutral-400 bg-white rounded-md text-neutral-800 transition-all duration-200"
                 required
               />
             </div>
@@ -89,7 +152,7 @@ export default function NuevaDireccionView() {
                 type="text"
                 value={formData.apellidoCompleto}
                 onChange={(e) => setFormData({ ...formData, apellidoCompleto: e.target.value })}
-                className="h-12 border-neutral-300 focus-visible:ring-neutral-400 bg-white rounded-md text-neutral-800"
+                className="h-12 border-neutral-300 focus-visible:ring-neutral-400 bg-white rounded-md text-neutral-800 transition-all duration-200"
                 required
               />
             </div>
@@ -284,12 +347,28 @@ export default function NuevaDireccionView() {
         </div>
 
         {/* Botón de Enviar Rojo */}
-        <div className="pt-2">
+        <div className="pt-2 flex gap-3">
           <Button
             type="submit"
-            className="bg-[#FF3C3C] hover:bg-red-600 text-white font-bold px-10 h-12 rounded-md text-base transition-colors shadow-sm"
+            disabled={loading}
+            className="bg-[#FF3C3C] hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold px-10 h-12 rounded-md text-base transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-2"
           >
-            Guardar
+            {loading ? (
+              <>
+                <Loader className="w-4 h-4 animate-spin" />
+                Guardando...
+              </>
+            ) : (
+              "Guardar"
+            )}
+          </Button>
+          <Button
+            type="button"
+            onClick={() => router.push("/perfil/direcciones")}
+            disabled={loading}
+            className="bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 text-gray-800 font-bold px-10 h-12 rounded-md text-base transition-all duration-200"
+          >
+            Cancelar
           </Button>
         </div>
 

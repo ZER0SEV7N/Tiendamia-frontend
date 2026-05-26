@@ -1,5 +1,5 @@
-import MisDireccionesView from "./nuevo/views/MisDireccionesView";
+import ListaDireccionesView from "./nuevo/views/ListaDireccionesView";
 
 export default function DireccionesPage() {
-  return <MisDireccionesView />;
+  return <ListaDireccionesView />;
 }
