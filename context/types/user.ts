@@ -21,7 +21,7 @@ export type RegisterPayload = Omit<User, 'id' | 'activo' | 'rol' | 'google_id'> 
 export interface AuthContextType {
     user: User | null;
     token: string | null;
-    autentificado: boolean;
+    autenticado: boolean;
     isLoading: boolean;
     
     login: (correo: string, password: string, redirectTo?: string) => Promise<void>;

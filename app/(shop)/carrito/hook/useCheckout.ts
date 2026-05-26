@@ -51,7 +51,7 @@ export const useCheckout = (Carrito: carrito | null) => {
                 total: Carrito.total,
             };
 
-            const { data } = await api.post("/api/ordenes/crear", payload);
+            const { data } = await api.post("/ordenes/crear", payload);
             if(data.success) {
                 localStorage.removeItem("tiendamia_cart");
                 router.push(`/carrito/success?orderId=${data.data.id}`);

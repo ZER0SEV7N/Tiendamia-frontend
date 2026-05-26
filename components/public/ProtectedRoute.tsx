@@ -16,24 +16,24 @@ interface Props {
 
 //Componente para proteger rutas específicas, solo permite acceso a usuarios autenticados y con roles específicos
 export const ProtectedRoute = ({ children, rolesPermitidos }: Props) => {
-    const { autentificado, isLoading, hasRole } = useAuth();
+    const { autenticado, isLoading, hasRole } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
 
     useEffect(() => {
         if(!isLoading) {
-            if(!autentificado) {
+            if(!autenticado) {
                 router.push(`/auth/login?redirect=${pathname}`);
             } else if (rolesPermitidos && !rolesPermitidos.some(role => hasRole(role))) {
                 router.push(`/auth/access-denied`);
             }
         }
-    }, [isLoading, autentificado, hasRole, rolesPermitidos, router, pathname]);
+    }, [isLoading, autenticado, hasRole, rolesPermitidos, router, pathname]);
 
     if(isLoading) 
         return <CarritoSkeleton />;
     
-    if(!autentificado || (rolesPermitidos && !rolesPermitidos.some(role => hasRole(role))))
+    if(!autenticado || (rolesPermitidos && !rolesPermitidos.some(role => hasRole(role))))
         return null; 
 
     return <>{children}</>;

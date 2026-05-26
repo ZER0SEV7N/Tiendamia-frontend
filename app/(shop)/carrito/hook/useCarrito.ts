@@ -50,7 +50,7 @@ export const useCarrito = (isAuthenticated: boolean) => {
 
     setIsLoading(true);
     try {
-      const { data } = await api.get<response<carrito>>("/api/carrito");
+      const { data } = await api.get<response<carrito>>("/carrito");
       setCarritoState(data.data);
     } catch (err: any) {
       setError(err.response?.data?.message || "Error al cargar el carrito");
@@ -71,7 +71,7 @@ export const useCarrito = (isAuthenticated: boolean) => {
 
         if (isAuthenticated) {
             try {
-                const { data } = await api.patch<response<carrito>>("/api/carrito/actualizar", {
+                const { data } = await api.patch<response<carrito>>("/carrito/actualizar", {
                     items: [{ idVariante, cantidad: nuevaCantidad }]
                 });
                 setCarritoState(data.data);
@@ -104,7 +104,7 @@ export const useCarrito = (isAuthenticated: boolean) => {
     const eliminarItem = async (idDetalle: number) => {
         if (isAuthenticated) {
             try {
-                const { data } = await api.delete<response<carrito>>(`/api/carrito/eliminar/${idDetalle}`);
+                const { data } = await api.delete<response<carrito>>(`/carrito/eliminar/${idDetalle}`);
                 setCarritoState(data.data);
             } catch (err: any) {
                 console.error("Error al eliminar del servidor", err);
@@ -137,7 +137,7 @@ export const useCarrito = (isAuthenticated: boolean) => {
                 idVariante: item.idVariante,
                 cantidad: item.cantidad
             }));
-            await api.post("/api/carrito/agregar", { items: itemsRequest });
+            await api.post("/carrito/agregar", { items: itemsRequest });
             localStorage.removeItem("tiendamia_cart");
         } catch (err) {
             console.error("Error sincronizando el carrito de invitado con el servidor", err);

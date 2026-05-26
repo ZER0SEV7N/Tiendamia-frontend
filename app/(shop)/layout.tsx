@@ -3,6 +3,7 @@
 import { Geist, Geist_Mono, Mulish } from "next/font/google";
 import Footer from "@/components/public/Footer";
 import SideBar from "@/components/public/SideBar";
+import {AuthProvider} from "@/context/context";
 import "@/app/globals.css";
 
 const geistSans = Geist({
@@ -32,9 +33,13 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${mulish.className} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-gray-50">
-        <SideBar />
 
-        <main className="grow flex flex-col">{children}</main>
+        <main className="grow flex flex-col">
+          <AuthProvider>
+            <SideBar />
+            {children}
+          </AuthProvider>
+        </main>
 
         <Footer />
       </body>

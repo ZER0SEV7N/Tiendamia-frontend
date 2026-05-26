@@ -6,23 +6,20 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
-import { User, AuthContextType, RegisterPayload } from '@/context/types/user'; // Asegúrate de importar RegisterPayload
+import { User, AuthContextType, RegisterPayload } from '@/context/types/user';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const router = useRouter();
-
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    // Cargar la sesion del usuario
     useEffect(() => {
         initAuth();
     }, []);
 
-    // Funcion para inicializar la autenticación al cargar la aplicación
     const initAuth = async () => {
         const storedToken = localStorage.getItem('tiendamia_token');
 
@@ -32,8 +29,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             try {
                 const { data } = await api.get('/auth/perfil');
-                // Asume que tu endpoint /auth/perfil devuelve { data: usuario }
-                setUser(data.data);
+                setUser(data.data as User);
             } catch (error) {
                 console.error("Error al cargar perfil:", error);
                 logout();
@@ -42,57 +38,77 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsLoading(false);
     };
 
-    // Funcion para iniciar sesión con correo y contraseña
     const login = async (correo: string, password: string) => {
         try {
             const { data } = await api.post('/auth/login', { correo, password });
-            const jwt = data.token;
-            // Estandariza si tu backend devuelve data.user o data.usuario
-            const userData = data.usuario || data.user; 
+            const payload = data.data; 
+            const jwt = payload.token;
+
+            const userData: User = {
+                id: payload.id || 0, 
+                correo: payload.correo,
+                nombres: payload.nombres,
+                rol: payload.rol,
+                activo: true
+            };
 
             guardarSesion(jwt, userData);
         } catch (error: any) {
-            throw new Error(error.response?.data?.message || "Error al iniciar sesión");
+            throw new Error(error.response?.data?.mensaje || error.response?.data?.message || "Error al iniciar sesión");
         }
     };
 
-    // Funcion para iniciar sesión con Google
     const loginConGoogle = async (googleToken: string) => {
         try {
             const { data } = await api.post('/auth/google', { token: googleToken });
-            const jwt = data.token;
-            const userData = data.usuario || data.user;
+            
+            const payload = data.data;
+            const jwt = payload.token;
+
+            const userData: User = {
+                id: payload.id || 0,
+                correo: payload.correo,
+                nombres: payload.nombres,
+                rol: payload.rol,
+                activo: true
+            };
             
             guardarSesion(jwt, userData);
         } catch (error: any) {
-            throw new Error(error.response?.data?.message || "Error al iniciar sesión con Google");
+            throw new Error(error.response?.data?.mensaje || "Error al iniciar sesión con Google");
         }
     };
 
-    // Funcion para registrar un usuario
-    const register = async (payload: RegisterPayload) => {
+    const register = async (payloadRequest: RegisterPayload) => {
         try {
-            const { data } = await api.post('/auth/register', payload);
-            const jwt = data.token;
-            const userData = data.usuario || data.user;
+            const { data } = await api.post('/auth/register', payloadRequest);
+            
+            // Dependiendo de si tu register devuelve el token igual que el login
+            const payload = data.data;
+            const jwt = payload.token;
+
+            const userData: User = {
+                id: payload.id || 0,
+                correo: payload.correo,
+                nombres: payload.nombres,
+                rol: payload.rol || "USER",
+                activo: true
+            };
 
             guardarSesion(jwt, userData);
         } catch (error: any) {
-            throw new Error(error.response?.data?.message || "Error al registrarse");
+            throw new Error(error.response?.data?.mensaje || "Error al registrarse");
         }
     };
 
-    //Funcion para verificar roles
     const hasRole = (role: string): boolean => {
         if (!user || !user.rol) return false;
         
-        //Verifica si tu backend devuelve el rol como string ("USER") 
+        //Maneja ambos casos: cuando viene del Login ("USER") y cuando viene del Perfil ({id: 2, nombre: "USER"})
         const userRole = typeof user.rol === 'string' ? user.rol : (user.rol as any)?.nombre;
-        
         return userRole?.toUpperCase() === role.toUpperCase();
     };
 
-    // Funcion auxiliar para guardar la sesión en localStorage y actualizar el estado
     const guardarSesion = (jwt: string, userData: User) => {
         localStorage.setItem("tiendamia_token", jwt);
         api.defaults.headers.common["Authorization"] = `Bearer ${jwt}`;
@@ -105,7 +121,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         delete api.defaults.headers.common["Authorization"];
         setToken(null);
         setUser(null);
-        router.push("/auth/login"); 
+        router.push("/"); 
     };
 
     return (
@@ -113,7 +129,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             value={{
                 user,
                 token,
-                autentificado: !!token,
+                autenticado: !!token,
                 isLoading,
                 login,
                 loginConGoogle,
@@ -127,8 +143,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
 };
 
-//Hook personalizado para usar el contexto fácilmente
-//Unir repositorio
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (context === undefined) 
