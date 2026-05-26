@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-hooks/immutability */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
@@ -80,12 +81,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             throw new Error(error.response?.data?.message || "Error al registrarse");
         }
     };
-    // Funcion para verificar roles
+
+    //Funcion para verificar roles
     const hasRole = (role: string): boolean => {
         if (!user || !user.rol) return false;
         
-        // Verifica si tu backend devuelve el rol como string ("USER") 
-        // o como un objeto ({ id: 2, nombre: "USER" })
+        //Verifica si tu backend devuelve el rol como string ("USER") 
         const userRole = typeof user.rol === 'string' ? user.rol : (user.rol as any)?.nombre;
         
         return userRole?.toUpperCase() === role.toUpperCase();
@@ -112,7 +113,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             value={{
                 user,
                 token,
-                isAuthenticated: !!token,
+                autentificado: !!token,
                 isLoading,
                 login,
                 loginConGoogle,
@@ -126,7 +127,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
 };
 
-// Hook personalizado para usar el contexto fácilmente
+//Hook personalizado para usar el contexto fácilmente
 //Unir repositorio
 export const useAuth = () => {
     const context = useContext(AuthContext);
