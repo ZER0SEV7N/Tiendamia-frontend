@@ -66,7 +66,7 @@ export const useCarrito = (isAuthenticated: boolean) => {
     }, [cargarCarrito]);
 
     //Funcion para calcular el carrito del invitado a partir de los items en localStorage
-    const actualizarCantidad = async (idVariante: number, nuevaCantidad: number, varianteData?: { nombre: string, precioUnitario: number }) => {
+    const actualizarCantidad = async (idVariante: number, nuevaCantidad: number) => {
         if (nuevaCantidad < 1) return;
 
         if (isAuthenticated) {

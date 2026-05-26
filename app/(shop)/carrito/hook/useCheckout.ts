@@ -15,11 +15,11 @@ export const useCheckout = (Carrito: carrito | null) => {
 
     //Formulario de direccion (si no se tiene una direccion guardada)
     const [direccion, setDireccion] = useState<DireccionForm>({
-        dirrecion: "",
+        direccion: "",
         distrito: "",
         provincia: "",
         departamento: "",
-        refencia: "",
+        referencia: "",
     });
 
     //Formulario de tarjeta (si no se tiene una tarjeta guardada)

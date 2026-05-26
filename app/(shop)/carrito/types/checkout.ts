@@ -1,11 +1,11 @@
 //types/checkout
 
 export interface DireccionForm {
-    dirrecion: string;
+    direccion: string;
     distrito: string;
     provincia: string;
     departamento: string;
-    refencia?: string;
+    referencia?: string;
 }
 
 export interface TarjetaForm {
