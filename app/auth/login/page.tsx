@@ -176,7 +176,7 @@ export default function LoginPage() {
       <div className="mt-4 text-center">
         <p className="text-xs text-gray-500 mb-2">¿No tienes una cuenta aún?</p>
         <Link
-          href="/register"
+          href="/auth/register"
           className="w-full block text-center border border-[#FF3C3C] text-[#FF3C3C] hover:bg-red-50 py-2 rounded text-sm transition"
         >
           Regístrate
