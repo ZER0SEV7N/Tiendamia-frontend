@@ -1,29 +1,33 @@
-//Tipo de dato para el usuario
+export type Rol = 'ADMIN' | 'USER';
+
+//Tipo para el usuario registrado en el sistema
 export type User = {
     id: number;
     nombres: string;
-    apellidos: string;
+    apellidos?: string | null; 
     correo: string;
-    password: string;
-    telefono: string;
+    telefono?: string | null;   
     activo: boolean;
+    rol: Rol | string;          
+    google_id?: string | null;  
 }
 
-//Tipo de dato para oauth de google 
-export type GoogleUser = {
-    id: string;
-    email: string;
-    nombres: string;
-    google_id: string;
+//Omitimos campos que no son necesarios para el registro por google
+export type RegisterPayload = Omit<User, 'id' | 'activo' | 'rol' | 'google_id'> & {
+    password: string;
 };
 
-export interface AuthContext {
+//Tipo para el usuario autenticado con Google, que puede no tener contraseña ni rol asignado
+export interface AuthContextType {
     user: User | null;
-    isAuthenticated: boolean;
+    token: string | null;
+    autenticado: boolean;
     isLoading: boolean;
-    login: (token: string, redirectTo?: string) => Promise<void>;
+    
+    login: (correo: string, password: string, redirectTo?: string) => Promise<void>;
+    loginConGoogle: (googleToken: string) => Promise<void>;
+    register: (userData: RegisterPayload) => Promise<void>;
     logout: () => void;
-    register: (userData: Omit<User, 'id'>) => Promise<void>;
-    loginWithGoogle: (googleToken: string) => Promise<void>;
-    hasRole: (role: string) => boolean;
+    
+    hasRole: (role: Rol | string) => boolean;
 }

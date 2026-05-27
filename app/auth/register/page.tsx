@@ -2,20 +2,29 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { SiGoogle } from "@icons-pack/react-simple-icons";
 import { Eye, EyeOff } from "lucide-react";
-import { register } from "@/lib/auth";
-
+import { useRegister } from "../hook/useRegister";
 export default function RegisterPage() {
-  const router = useRouter();
-  const [form, setForm] = useState({
-    nombres: "", apellidos: "", correo: "",
-    telefono: "", password: "", confirmar: "",
-  });
+  
+  const {
+    nombres,
+    setNombres,
+    apellidos,
+    setApellidos,
+    correo,
+    setCorreo,
+    password,
+    setPassword,
+    confirmPassword,
+    setConfirmPassword,
+    error,
+    cargando,
+    handleSubmit,
+    loginConGoogle
+  } = useRegister();
+
   const [mostrarPass, setMostrarPass] = useState(false);
-  const [error, setError] = useState("");
-  const [cargando, setCargando] = useState(false);
 
   const nivelSeguridad = (pass: string) => {
     if (!pass) return { texto: "Sin contraseña", color: "text-gray-400" };
@@ -25,36 +34,18 @@ export default function RegisterPage() {
     return { texto: "Media", color: "text-yellow-500" };
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    if (form.password !== form.confirmar) {
-      setError("Las contraseñas no coinciden");
-      return;
-    }
-    setCargando(true);
-    try {
-      await register(form.nombres, form.apellidos, form.correo, form.telefono, form.password);
-      router.push("/");
-      router.refresh();
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response: { data: { error?: string } } };
-        setError(axiosErr.response?.data?.error || "Error al registrarse");
-      } else {
-        setError("Error al registrarse");
-      }
-    }
-  };
-
-  const seguridad = nivelSeguridad(form.password);
+  const seguridad = nivelSeguridad(password);
 
   return (
-    <div className="w-full max-w-sm bg-white border border-gray-200 rounded-md p-8 shadow-sm">
+    <div className="w-full max-w-sm bg-white border border-gray-200 rounded-md p-8 shadow-sm mx-auto mt-10">
       <h1 className="text-center text-lg font-normal text-gray-600 mb-5">Regístrate</h1>
 
       {/* Google */}
-      <button className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded py-2 text-sm text-gray-700 hover:bg-gray-50 transition mb-4">
+      <button 
+        type="button"
+        // onClick={() => loginConGoogle("token_simulado")} // <-- Conectar aquí
+        className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded py-2 text-sm text-gray-700 hover:bg-gray-50 transition mb-4"
+      >
         <SiGoogle className="w-4 h-4" />
         <span>Ingresar con Google</span>
       </button>
@@ -81,8 +72,8 @@ export default function RegisterPage() {
           <input
             type="text"
             required
-            value={form.nombres}
-            onChange={(e) => setForm({ ...form, nombres: e.target.value })}
+            value={nombres}
+            onChange={(e) => setNombres(e.target.value)}
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
           />
         </div>
@@ -95,8 +86,8 @@ export default function RegisterPage() {
           <input
             type="text"
             required
-            value={form.apellidos}
-            onChange={(e) => setForm({ ...form, apellidos: e.target.value })}
+            value={apellidos}
+            onChange={(e) => setApellidos(e.target.value)}
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
           />
         </div>
@@ -109,8 +100,8 @@ export default function RegisterPage() {
           <input
             type="email"
             required
-            value={form.correo}
-            onChange={(e) => setForm({ ...form, correo: e.target.value })}
+            value={correo}
+            onChange={(e) => setCorreo(e.target.value)}
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
           />
         </div>
@@ -124,8 +115,8 @@ export default function RegisterPage() {
             <input
               type={mostrarPass ? "text" : "password"}
               required
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-400 pr-10"
             />
             <button
@@ -149,14 +140,14 @@ export default function RegisterPage() {
           <input
             type="password"
             required
-            value={form.confirmar}
-            onChange={(e) => setForm({ ...form, confirmar: e.target.value })}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
           />
         </div>
 
-        {/* Checkbox ofertas */}
-        <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+        {/* Checkbox ofertas (opcional, visual) */}
+        <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer pt-1">
           <input type="checkbox" className="rounded" />
           Recibir ofertas de Tiendamia
         </label>
@@ -175,7 +166,7 @@ export default function RegisterPage() {
       <div className="mt-4 text-center">
         <p className="text-xs text-gray-500 mb-2">¿Ya tienes una cuenta?</p>
         <Link
-          href="/login"
+          href="/auth/login"
           className="w-full block text-center border border-[#FF3C3C] text-[#FF3C3C] hover:bg-red-50 py-2 rounded text-sm transition"
         >
           Ingresar
