@@ -4,7 +4,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "supabase.co",
+        hostname: "m.media-amazon.com",
         port: "",
         pathname: "/**", // Permite cualquier ruta dentro de supabase.co
       },
