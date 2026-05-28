@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { useForm, useFieldArray, Control } from "react-hook-form";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React from "react";
+import { Control, FormProvider } from "react-hook-form";
 import {
   Plus,
   Trash2,
   Save,
-  RefreshCw,
   Image as ImageIcon,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -23,93 +23,39 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useRouter } from "next/navigation";
-import { Categoria } from "@/types/categoria/categoria";
 
-// Validación de archivos con Zod
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_IMAGE_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/jpg",
-];
-
-const fileValidation = z
-  .any()
-  .refine((files) => files?.length === 1, "La imagen es obligatoria")
-  .refine(
-    (files) => files?.[0]?.size <= MAX_FILE_SIZE,
-    "El tamaño máximo es de 5MB",
-  )
-  .refine(
-    (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
-    "Solo se admiten formatos .jpg, .jpeg, .png y .webp",
-  );
-
-const caracteristicaSchema = z.object({
-  atributoNombre: z.string().min(1, "El atributo es obligatorio"),
-  valorTexto: z.string().min(1, "El valor es obligatorio"),
-});
-
-const variacionSchema = z.object({
-  codigoInventario: z.string().min(1, "El SKU es obligatorio"),
-  precio: z.coerce.number().positive("El precio debe ser mayor a 0"),
-  stock: z.coerce.number().int().min(0, "El stock no puede ser negativo"),
-  imagenArchivo: fileValidation,
-  caracteristicas: z.array(caracteristicaSchema),
-  isNewInDb: z.boolean().optional().default(false),
-});
-
-const formSchema = z.object({
-  nombre: z.string().min(1, "El nombre es obligatorio"),
-  slug: z
-    .string()
-    .regex(/^[a-z0-9-]+$/, "Formato de slug inválido (ej: mi-marca-123)"),
-  descripcion: z.string().min(1, "La descripción es obligatoria"),
-  imagenArchivo: z.any().optional(),
-  categoriaPadreId: z.string().optional(),
-  categoriaHijaId: z.string().optional(),
-  categoriaId: z.coerce
-    .number()
-    .int()
-    .positive("La subcategoría final es obligatoria"),
-  marcaId: z.coerce.number().int().positive("Marca obligatoria"),
-  estado: z.boolean().default(true),
-  variaciones: z
-    .array(variacionSchema)
-    .min(1, "Debe tener al menos una variación"),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import {
+  useProductoForm,
+  FormValues,
+} from "@/app/(admin)/admin/hooks/useProductoForm"; // Ajusta la ruta según tu proyecto
+import { ProductoRequest } from "@/types/producto/productoList";
 
 interface ProductoFormProps {
-  initialData?: any;
+  initialData?: ProductoRequest;
   isEdit?: boolean;
-  onCreate?: (data: FormData) => void;
-  onUpdateProduct?: (data: any) => void;
-  onUpdateVariant?: (sku: string, data: any) => void;
-  onCreateVariant?: (data: any) => void;
+  onCreate?: (data: ProductoRequest) => void | Promise<string>;
+  onUpdate?: (data: ProductoRequest) => void | Promise<string>;
   onOpenModalNuevaMarca?: () => void;
 }
 
 // =========================================================
-// SUBCOMPONENTE: Atributos Dinámicos por Variante
+// SUBCOMPONENTE: Atributos Dinámicos por Variante (Mantiene tu diseño)
 // =========================================================
 interface AtributosDinamicosProps {
   nestIndex: number;
   control: Control<FormValues>;
+  append: (value: { atributoNombre: string; valorTexto: string }) => void;
+  remove: (index: number) => void;
+  fields: Record<string, any>[];
 }
 
 const AtributosDinamicos = ({
   nestIndex,
   control,
+  fields,
+  append,
+  remove,
 }: AtributosDinamicosProps) => {
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: `variaciones.${nestIndex}.caracteristicas`,
-  });
-
   return (
     <div className="md:col-span-2 xl:col-span-6 space-y-3 p-4 bg-slate-50/50 rounded-xl border border-dashed border-slate-200 w-full">
       <div className="flex items-center justify-between">
@@ -197,158 +143,71 @@ const AtributosDinamicos = ({
 };
 
 // =========================================================
-// COMPONENTE PRINCIPAL: Formulario de Productos
+// COMPONENTE PRINCIPAL: Formulario de Productos con el Hook nuevo
 // =========================================================
 export const ProductoForm = ({
   initialData,
   isEdit = false,
   onCreate,
-  onUpdateProduct,
-  onUpdateVariant,
-  onCreateVariant,
+  onUpdate,
   onOpenModalNuevaMarca,
 }: ProductoFormProps) => {
-  const [mainPreview, setMainPreview] = useState<string | null>(null);
-  const [variantPreviews, setVariantPreviews] = useState<
-    Record<number, string>
-  >({});
-
-  const [categoriasPadre, setCategoriasPadre] = useState<Categoria[]>([]);
-  const [categoriasHija, setCategoriasHija] = useState<Categoria[]>([]);
-  const [categoriasNieta, setCategoriasNieta] = useState<Categoria[]>([]);
-  const [marcas, setMarcas] = useState<Categoria[]>([]);
   const router = useRouter();
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      nombre: "",
-      slug: "",
-      descripcion: "",
-      categoriaPadreId: "",
-      categoriaHijaId: "",
-      categoriaId: undefined,
-      marcaId: undefined,
-      estado: true,
-      variaciones: [
-        {
-          codigoInventario: "",
-          precio: 0,
-          stock: 0,
-          imagenArchivo: undefined,
-          caracteristicas: [],
-          isNewInDb: false,
-        },
-      ],
-    },
-  });
-
+  // Consumimos todo desde tu nuevo custom hook
   const {
-    fields: variantFields,
-    append: appendVariant,
-    remove: removeVariant,
-  } = useFieldArray({
-    control: form.control,
-    name: "variaciones",
+    form,
+    onSubmit,
+    isLoading,
+    marcas,
+    opcionesPadre,
+    opcionesHija,
+    opcionesNieta,
+    mainPreview,
+    variantPreviews,
+    variantFields,
+    appendVariant,
+    handleRemoveVariant,
+    handleImageChange,
+  } = useProductoForm({
+    initialData,
+    isEdit,
+    onCreate,
+    onUpdate,
   });
 
-  useEffect(() => {
-    if (isEdit && initialData) {
-      form.reset(initialData);
-      if (initialData.imagenUrl) setMainPreview(initialData.imagenUrl);
-
-      const existingPreviews: Record<number, string> = {};
-      initialData.variaciones?.forEach((v: any, idx: number) => {
-        if (v.imagenUrl) existingPreviews[idx] = v.imagenUrl;
-      });
-      setVariantPreviews(existingPreviews);
-    }
-  }, [initialData, isEdit, form]);
-
-  const handleImageChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    onChange: (...event: any[]) => void,
-    type: "main" | "variant",
-    index?: number,
-  ) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      onChange(files);
-      const fileUrl = URL.createObjectURL(files[0]);
-
-      if (type === "main") {
-        setMainPreview(fileUrl);
-      } else if (type === "variant" && typeof index === "number") {
-        setVariantPreviews((prev) => ({ ...prev, [index]: fileUrl }));
-      }
-    }
-  };
-
-  const onSubmit = (values: FormValues) => {
-    if (!isEdit && onCreate) {
-      const formData = new FormData();
-      formData.append("nombre", values.nombre);
-      formData.append("slug", values.slug);
-      formData.append("descripcion", values.descripcion);
-      formData.append("categoriaId", String(values.categoriaId));
-      formData.append("marcaId", String(values.marcaId));
-      formData.append("estado", String(values.estado));
-
-      if (values.imagenArchivo?.[0]) {
-        formData.append("imagenPrincipal", values.imagenArchivo[0]);
-      }
-
-      values.variaciones.forEach((variacion, index) => {
-        formData.append(
-          `variaciones[${index}][codigoInventario]`,
-          variacion.codigoInventario,
-        );
-        formData.append(
-          `variaciones[${index}][precio]`,
-          String(variacion.precio),
-        );
-        formData.append(
-          `variaciones[${index}][stock]`,
-          String(variacion.stock),
-        );
-        formData.append(
-          `variaciones[${index}][caracteristicas]`,
-          JSON.stringify(variacion.caracteristicas),
-        );
-
-        if (variacion.imagenArchivo?.[0]) {
-          formData.append(
-            `imagenVariante_${index}`,
-            variacion.imagenArchivo[0],
-          );
-        }
-      });
-
-      onCreate(formData);
-    }
-  };
+  // Si los catálogos se están cargando asíncronamente desde los servicios
+  if (isLoading) {
+    return (
+      <div className="w-full h-60 flex items-center justify-center bg-white rounded-2xl border shadow-sm">
+        <div className="flex flex-col items-center gap-2 text-muted-foreground text-sm">
+          <Loader2 className="h-8 w-8 animate-spin text-[#FF3C3C]" />
+          <span>Cargando catálogos y dependencias...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <Form {...form}>
+      {/* Proveedor de Formulario de react-hook-form usando la instancia del hook */}
+      <FormProvider {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={onSubmit}
           className="space-y-8 w-full max-w-full p-6 bg-white rounded-xl border shadow-sm"
         >
           {/* ENCABEZADO */}
           <div className="border-b pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
             <div className="flex flex-col gap-1 w-full">
-              {/* Contenedor flexible para el Botón y el Título alineados al centro */}
               <div className="flex items-center gap-4">
                 <Button
                   type="button"
                   variant="outline"
-                  size="icon" // Cambiado a "icon" para que sea perfectamente cuadrado
+                  size="icon"
                   onClick={() => router.push("/admin/productos")}
                   className="h-9 w-9 bg-[#FF3C3C] text-white hover:bg-[#b31a0f] hover:text-white cursor-pointer shrink-0 shadow-sm border-none flex items-center justify-center"
                   title="Volver a productos"
                 >
-                  {/* Icono agrandado a h-5 w-5 */}
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
 
@@ -411,7 +270,7 @@ export const ProductoForm = ({
                 )}
               />
 
-              {/* MARCA SUBIDA A LA PRIMERA FILA */}
+              {/* MARCA INYECTADA DESDE EL HOOK */}
               <FormField
                 control={form.control}
                 name="marcaId"
@@ -424,6 +283,7 @@ export const ProductoForm = ({
                       <FormControl className="flex-1">
                         <select
                           {...field}
+                          value={field.value ?? ""}
                           className="w-full h-10 px-3 border rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
                         >
                           <option value="">Seleccione Marca...</option>
@@ -449,7 +309,7 @@ export const ProductoForm = ({
                 )}
               />
 
-              {/* BLOQUE DE CATEGORÍAS EN UNA SOLA LÍNEA */}
+              {/* BLOQUE DE CATEGORÍAS EN CASCADA COMPLETA */}
               <div className="grid grid-cols-1 md:grid-cols-3 md:col-span-2 xl:col-span-3 gap-4">
                 <FormField
                   control={form.control}
@@ -463,14 +323,9 @@ export const ProductoForm = ({
                         <select
                           {...field}
                           className="w-full h-10 px-3 border rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
-                          onChange={(e) => {
-                            field.onChange(e);
-                            form.setValue("categoriaHijaId", "");
-                            form.setValue("categoriaId", undefined as any);
-                          }}
                         >
                           <option value="">Seleccione...</option>
-                          {categoriasPadre.map((cat) => (
+                          {opcionesPadre.map((cat) => (
                             <option key={cat.id} value={cat.id}>
                               {cat.nombre}
                             </option>
@@ -495,13 +350,9 @@ export const ProductoForm = ({
                           {...field}
                           disabled={!form.watch("categoriaPadreId")}
                           className="w-full h-10 px-3 border rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-400 disabled:bg-slate-100 disabled:cursor-not-allowed"
-                          onChange={(e) => {
-                            field.onChange(e);
-                            form.setValue("categoriaId", undefined as any);
-                          }}
                         >
                           <option value="">Seleccione...</option>
-                          {categoriasHija.map((cat) => (
+                          {opcionesHija.map((cat) => (
                             <option key={cat.id} value={cat.id}>
                               {cat.nombre}
                             </option>
@@ -524,11 +375,12 @@ export const ProductoForm = ({
                       <FormControl>
                         <select
                           {...field}
+                          value={field.value ?? ""}
                           disabled={!form.watch("categoriaHijaId")}
                           className="w-full h-10 px-3 border rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-400 disabled:bg-slate-100 disabled:cursor-not-allowed"
                         >
                           <option value="">Seleccione...</option>
-                          {categoriasNieta.map((cat) => (
+                          {opcionesNieta.map((cat) => (
                             <option key={cat.id} value={cat.id}>
                               {cat.nombre}
                             </option>
@@ -604,6 +456,7 @@ export const ProductoForm = ({
                 />
               </div>
 
+              {/* CONTROL DE ESTADO EN EDICIÓN */}
               {isEdit && (
                 <div className="md:col-span-2 xl:col-span-3 flex items-center">
                   <FormField
@@ -628,20 +481,6 @@ export const ProductoForm = ({
                 </div>
               )}
             </div>
-
-            {isEdit && onUpdateProduct && (
-              <div className="flex justify-end pt-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => onUpdateProduct(form.getValues())}
-                  className="gap-1.5 font-semibold text-xs bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <RefreshCw className="h-3 w-3" /> Actualizar Datos Base
-                </Button>
-              </div>
-            )}
           </div>
 
           {/* ================= SECCIÓN DETALLE: VARIACIONES ================= */}
@@ -673,7 +512,39 @@ export const ProductoForm = ({
 
             <div className="space-y-6">
               {variantFields.map((field, index) => {
-                const isNewRow = form.watch(`variaciones.${index}.isNewInDb`);
+                // Instanciamos el manejador interno para sus características de FieldArray
+                // Esto nos permite aislar las mutaciones de atributos de cada fila/variación de forma nativa.
+                const subMethods = {
+                  append: (val: any) => {
+                    const current =
+                      form.getValues(`variaciones.${index}.caracteristicas`) ||
+                      [];
+                    form.setValue(`variaciones.${index}.caracteristicas`, [
+                      ...current,
+                      val,
+                    ]);
+                  },
+                  remove: (kIdx: number) => {
+                    const current =
+                      form.getValues(`variaciones.${index}.caracteristicas`) ||
+                      [];
+                    form.setValue(
+                      `variaciones.${index}.caracteristicas`,
+                      current.filter((_, i) => i !== kIdx),
+                    );
+                  },
+                  fields:
+                    form.watch(`variaciones.${index}.caracteristicas`) || [],
+                };
+
+                // Convertimos el array reactivo actual a objetos con un ID virtual para iterar estables en el subcomponente
+                const virtualizedFields = subMethods.fields.map(
+                  (f: any, i: number) => ({
+                    id: `${field.id}-attr-${i}`,
+                    ...f,
+                  }),
+                );
+
                 return (
                   <div
                     key={field.id}
@@ -684,13 +555,7 @@ export const ProductoForm = ({
                       variant="outline"
                       size="icon"
                       className="sm:mt-6 border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 shrink-0"
-                      onClick={() => {
-                        if (!isEdit && variantFields.length === 1) return;
-                        removeVariant(index);
-                        const updatedPreviews = { ...variantPreviews };
-                        delete updatedPreviews[index];
-                        setVariantPreviews(updatedPreviews);
-                      }}
+                      onClick={() => handleRemoveVariant(index)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -707,7 +572,12 @@ export const ProductoForm = ({
                             <FormControl>
                               <Input
                                 placeholder="ZAPA-RED-41"
-                                disabled={isEdit && !isNewRow}
+                                disabled={
+                                  isEdit &&
+                                  !form.getValues(
+                                    `variaciones.${index}.isNewInDb`,
+                                  )
+                                }
                                 {...field}
                                 className="text-xs"
                               />
@@ -806,47 +676,14 @@ export const ProductoForm = ({
                         )}
                       />
 
+                      {/* SUBCOMPONENTE DE ATRIBUTOS PASANDO LOS MANEJADORES CENTRALIZADOS */}
                       <AtributosDinamicos
                         nestIndex={index}
                         control={form.control}
+                        fields={virtualizedFields}
+                        append={subMethods.append}
+                        remove={subMethods.remove}
                       />
-
-                      {isEdit && (
-                        <div className="md:col-span-2 xl:col-span-6 flex justify-end pt-2 border-t border-dashed">
-                          {!isNewRow && onUpdateVariant ? (
-                            <Button
-                              type="button"
-                              size="sm"
-                              className="bg-orange-500 hover:bg-orange-600 text-white font-semibold text-xs"
-                              onClick={() =>
-                                onUpdateVariant(
-                                  form.getValues(
-                                    `variaciones.${index}.codigoInventario`,
-                                  ),
-                                  form.getValues(`variaciones.${index}`),
-                                )
-                              }
-                            >
-                              Actualizar Variante
-                            </Button>
-                          ) : (
-                            onCreateVariant && (
-                              <Button
-                                type="button"
-                                size="sm"
-                                className="bg-green-600 hover:bg-green-700 text-white font-semibold text-xs"
-                                onClick={() =>
-                                  onCreateVariant(
-                                    form.getValues(`variaciones.${index}`),
-                                  )
-                                }
-                              >
-                                Guardar como Nueva Variante
-                              </Button>
-                            )
-                          )}
-                        </div>
-                      )}
                     </div>
                   </div>
                 );
@@ -854,24 +691,18 @@ export const ProductoForm = ({
             </div>
           </div>
 
-          {/* ACCIONES INFERIORES */}
+          {/* ACCIONES INFERIORES CENTRALIZADAS */}
           <div className="flex justify-end pt-4 border-t">
-            {!isEdit ? (
-              <Button
-                type="submit"
-                className="bg-[#FF3C3C] hover:bg-[#b31a0f] cursor-pointer text-white font-medium px-8"
-              >
-                <Save className="mr-2 h-4 w-4" /> Guardar Producto
-              </Button>
-            ) : (
-              <p className="text-xs text-muted-foreground italic">
-                * Cada sección se guarda individualmente mediante sus
-                respectivos botones en modo edición.
-              </p>
-            )}
+            <Button
+              type="submit"
+              className="bg-[#FF3C3C] hover:bg-[#b31a0f] cursor-pointer text-white font-medium px-8 flex items-center gap-2"
+            >
+              <Save className="h-4 w-4" />
+              {isEdit ? "Actualizar Producto" : "Guardar Producto"}
+            </Button>
           </div>
         </form>
-      </Form>
+      </FormProvider>
     </div>
   );
 };
