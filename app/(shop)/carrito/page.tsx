@@ -5,20 +5,23 @@ import { CarritoVacio } from "./components/carritoVacio";
 import { ResumenCompra } from "./components/resumenCompra";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Plus, Minus } from "lucide-react";
+import { useAuth } from "@/context/context";
+import { CarritoSkeleton } from "./components/carritoSkeleton";
 
 export default function CarritoPage() {
-  const { carrito, isLoading, error, actualizarCantidad, eliminarItem } = useCarrito();
-
-  if (isLoading) return <div className="p-10 text-center">Cargando carrito...</div>;
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { carritoState, isLoading, error, actualizarCantidad, eliminarItem } = useCarrito(isAuthenticated);
+  
+  if (authLoading || isLoading) return <CarritoSkeleton />;
   if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
-  if (!carrito || carrito.items.length === 0) return <CarritoVacio />;
+  if (!carritoState || carritoState.items.length === 0) return <CarritoVacio />;
 
   return (
     <div className="container mx-auto max-w-6xl py-8 px-4">
       <h1 className="text-3xl font-semibold mb-8 text-slate-800">Mi carrito</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* COLUMNA IZQUIERDA: Lista de Productos */}
+        {/* COLUMNA IZQUIERDA: Productos */}
         <div className="lg:col-span-2 space-y-4">
           <Card className="rounded-md border-slate-200 shadow-sm">
             <CardHeader className="bg-slate-50 border-b pb-4">
@@ -28,9 +31,9 @@ export default function CarritoPage() {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              {carrito.items.map((item) => (
+              {carritoState.items.map((item) => (
                 <div key={item.idVariante} className="p-6 flex flex-col sm:flex-row gap-6 items-start border-b last:border-0">
-                  <div className="w-24 h-24 bg-slate-100 rounded-md flex items-center justify-center">
+                  <div className="w-24 h-24 bg-slate-100 rounded-md flex items-center justify-center flex-shrink-0">
                     <span className="text-xs text-slate-400">IMG</span>
                   </div>
                   
@@ -58,8 +61,8 @@ export default function CarritoPage() {
                         </button>
                       </div>
                       <button 
-                        onClick={() => eliminarItem(item.idDetalle || item.idVariante)} 
-                        className="text-slate-400 hover:text-red-500"
+                        onClick={() => eliminarItem(isAuthenticated ? (item.idDetalle || 0) : item.idVariante)} 
+                        className="text-slate-400 hover:text-red-500 transition-colors"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
@@ -81,9 +84,9 @@ export default function CarritoPage() {
           </Card>
         </div>
 
-        {/* COLUMNA DERECHA: Resumen importado */}
+        {/* COLUMNA DERECHA: Resumen */}
         <div className="space-y-6">
-          <ResumenCompra carrito={carrito} />
+          <ResumenCompra carrito={carritoState} isAuthenticated={isAuthenticated} />
         </div>
       </div>
     </div>
