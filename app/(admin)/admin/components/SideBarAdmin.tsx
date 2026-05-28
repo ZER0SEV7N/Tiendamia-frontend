@@ -12,10 +12,17 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut, LayoutDashboard, Package, User } from "lucide-react";
+import { useAuth } from "@/context/context";
 
 function SideBarAdmin() {
+  const { logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/admin/auth/login");
+  };
 
   // Rutas
   const menuItems = [
@@ -111,9 +118,7 @@ function SideBarAdmin() {
           <SidebarMenuItem>
             <SidebarMenuButton
               className="w-full h-11 justify-start gap-4 px-4 rounded-xl font-semibold text-[14px] text-zinc-500 hover:bg-red-50 hover:text-[#FF3C3C] dark:hover:bg-red-950/20 transition-all"
-              onClick={() => {
-                router.push("/admin/auth/login");
-              }}
+              onClick={handleLogout}
             >
               <LogOut className="h-5 w-5 text-zinc-400 group-hover:text-[#FF3C3C]" />
               <span>Cerrar Sesión</span>

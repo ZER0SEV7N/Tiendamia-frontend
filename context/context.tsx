@@ -51,6 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       };
 
       guardarSesion(jwt, userData);
+      return userData;
     } catch (error: any) {
       throw new Error(
         error.response?.data?.mensaje ||
