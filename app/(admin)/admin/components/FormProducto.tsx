@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
+import { Categoria } from "@/types/categoria/categoria";
 
 // Validación de archivos con Zod
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -212,10 +213,10 @@ export const ProductoForm = ({
     Record<number, string>
   >({});
 
-  const [categoriasPadre, setCategoriasPadre] = useState<any[]>([]);
-  const [categoriasHija, setCategoriasHija] = useState<any[]>([]);
-  const [categoriasNieta, setCategoriasNieta] = useState<any[]>([]);
-  const [marcas, setMarcas] = useState<any[]>([]);
+  const [categoriasPadre, setCategoriasPadre] = useState<Categoria[]>([]);
+  const [categoriasHija, setCategoriasHija] = useState<Categoria[]>([]);
+  const [categoriasNieta, setCategoriasNieta] = useState<Categoria[]>([]);
+  const [marcas, setMarcas] = useState<Categoria[]>([]);
   const router = useRouter();
 
   const form = useForm<FormValues>({

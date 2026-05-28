@@ -1,24 +1,6 @@
-import { ProductoList } from "@/types/producto/productoList";
 import { columns } from "../components/Table/columns";
-import { useEffect, useState } from "react";
-import { getProductos } from "@/services/producto";
 
 export const useTableProduct = () => {
-  const [productos, setProductos] = useState<ProductoList[]>([]);
-
-  useEffect(() => {
-    const cargarProductos = async () => {
-      try {
-        const data = await getProductos();
-        setProductos(data);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
-
-    cargarProductos();
-  }, []);
-
   const handleEdit = (id: number) => {
     console.log("Redirigiendo a editar producto ID:", id);
     // Aquí usarás: router.push(`/admin/productos/${id}`)
@@ -34,5 +16,6 @@ export const useTableProduct = () => {
   };
 
   const tablaColumns = columns(handleEdit, handleDelete, handleStatusChange);
-  return { tablaColumns, productos };
+
+  return { tablaColumns };
 };

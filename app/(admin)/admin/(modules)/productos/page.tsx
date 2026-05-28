@@ -6,14 +6,31 @@ import { Button } from "@/components/ui/button"; // Si usas shadcn para los boto
 import { Plus } from "lucide-react"; // Iconos útiles para acompañar los filtros
 import { useRouter } from "next/navigation"; // Para navegación programática al crear un nuevo producto
 import FiltrosInventario from "../../components/Table/FiltrosInventario";
+import { useFilterProducto } from "../../hooks/useFilterProducto";
 
 export default function ProductosPage() {
-  const { tablaColumns, productos } = useTableProduct();
+  const { tablaColumns } = useTableProduct();
+  const {
+    busqueda,
+    setBusqueda,
+    estado,
+    setEstado,
+    selectedPadre,
+    selectedHija,
+    selectedNieta,
+    opcionesPadre,
+    opcionesHija,
+    opcionesNieta,
+    productosFiltrados,
+    handlePadreChange,
+    handleHijaChange,
+    handleNietaChange,
+    handleAplicarFiltros,
+  } = useFilterProducto();
   const router = useRouter();
 
   return (
     <div className="p-6 space-y-6 w-full animate-fade-in">
-      {/* HEADER PRINCIPAL */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
@@ -33,12 +50,25 @@ export default function ProductosPage() {
         </Button>
       </div>
 
-      {/* FILTROS */}
-      <FiltrosInventario />
+      <FiltrosInventario
+        busqueda={busqueda}
+        setBusqueda={setBusqueda}
+        estado={estado}
+        setEstado={setEstado}
+        catPadre={selectedPadre}
+        catHija={selectedHija}
+        catNieta={selectedNieta}
+        categoriasPadre={opcionesPadre}
+        categoriasHija={opcionesHija}
+        categoriasNieta={opcionesNieta}
+        onPadreChange={handlePadreChange}
+        onHijaChange={handleHijaChange}
+        onNietaChange={handleNietaChange}
+        onAplicarFiltros={handleAplicarFiltros}
+      />
 
-      {/* --- BLOQUE DE LA TABLA DATA TABLE --- */}
       <div className="w-full">
-        <ProductosDataTable columns={tablaColumns} data={productos} />
+        <ProductosDataTable columns={tablaColumns} data={productosFiltrados} />
       </div>
     </div>
   );
