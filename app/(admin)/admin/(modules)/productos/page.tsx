@@ -3,11 +3,11 @@
 import { ProductosDataTable } from "@/app/(admin)/admin/components/Table/data-table";
 import { useTableProduct } from "../../hooks/useTableProduct";
 import { Button } from "@/components/ui/button"; // Si usas shadcn para los botones de acción
-import { Plus, SlidersHorizontal } from "lucide-react"; // Iconos útiles para acompañar los filtros
+import { Plus } from "lucide-react"; // Iconos útiles para acompañar los filtros
 import FiltrosInventario from "../../components/Table/FiltrosInventario";
 
 export default function ProductosPage() {
-  const { tablaColumns } = useTableProduct();
+  const { tablaColumns, productos } = useTableProduct();
 
   return (
     <div className="p-6 space-y-6 w-full animate-fade-in">
@@ -33,7 +33,7 @@ export default function ProductosPage() {
 
       {/* --- BLOQUE DE LA TABLA DATA TABLE --- */}
       <div className="w-full">
-        <ProductosDataTable columns={tablaColumns} data={[]} />
+        <ProductosDataTable columns={tablaColumns} data={productos} />
       </div>
     </div>
   );
