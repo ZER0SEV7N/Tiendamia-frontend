@@ -10,7 +10,7 @@ export const useTableProduct = () => {
     const cargarProductos = async () => {
       try {
         const data = await getProductos();
-        setProductos(data.data);
+        setProductos(data);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
