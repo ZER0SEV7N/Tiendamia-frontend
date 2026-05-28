@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader, MapPin, Trash2, Plus, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
-import { Direccion } from "../../types/direccion";
+import { Direccion } from "../../../types/direccion";
 
 export default function MisDireccionesView() {
   const router = useRouter();
