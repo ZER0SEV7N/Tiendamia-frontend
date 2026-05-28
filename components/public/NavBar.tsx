@@ -9,10 +9,9 @@ import { Button } from "../ui/button";
 import { ChevronDown, ShoppingCart, Heart, Search } from "lucide-react";
 import { SiGoogle } from "@icons-pack/react-simple-icons";
 import Link from "next/link";
-import { useAuth } from "@/context/context"; 
+import { useAuth } from "@/context/context";
 
-function SideBar() {
-
+function NavBar() {
   const { user: usuario, logout: handleLogout } = useAuth();
 
   return (
@@ -141,7 +140,10 @@ function SideBar() {
           {/* CARRITO */}
           <HoverCard openDelay={0} closeDelay={150}>
             <HoverCardTrigger asChild>
-              <Link href="/carrito" className="text-white bg-transparent border-none p-1 h-auto relative flex items-center justify-center cursor-pointer focus:outline-none">
+              <Link
+                href="/carrito"
+                className="text-white bg-transparent border-none p-1 h-auto relative flex items-center justify-center cursor-pointer focus:outline-none"
+              >
                 <span className="relative inline-block">
                   <ShoppingCart className="h-6 w-6 text-white stroke-2" />
                   <span className="absolute -top-1.5 -right-1 bg-[#FF3C3C] text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-[#FF3C3C]">
@@ -169,4 +171,4 @@ function SideBar() {
   );
 }
 
-export default SideBar;
+export default NavBar;
