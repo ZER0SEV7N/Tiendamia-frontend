@@ -10,9 +10,16 @@ import { ChevronDown, ShoppingCart, Heart, Search } from "lucide-react";
 import { SiGoogle } from "@icons-pack/react-simple-icons";
 import Link from "next/link";
 import { useAuth } from "@/context/context";
+import { useRouter } from "next/navigation";
 
 function NavBar() {
-  const { user: usuario, logout: handleLogout } = useAuth();
+  const { user: usuario, logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   return (
     <header className="w-full bg-[#FF3C3C] text-white px-4 py-3 shadow-md">

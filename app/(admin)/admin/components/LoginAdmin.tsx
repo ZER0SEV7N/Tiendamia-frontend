@@ -3,21 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { LayoutDashboard } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useLoginAdmin } from "../hooks/useLoginAdmin";
 
 export function LoginAdmin({ ...props }: React.ComponentProps<"div">) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const router = useRouter();
+  const { email, setEmail, password, setPassword, handleSubmit, error } =
+    useLoginAdmin();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (email === "admin@gmail.com" && password === "123") {
-      router.push("/admin/dashboard");
-    }
-  };
   return (
     <div {...props}>
       <Card className="overflow-hidden p-0 border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-2xl">
@@ -79,6 +70,11 @@ export function LoginAdmin({ ...props }: React.ComponentProps<"div">) {
                   required
                 />
               </Field>
+
+              {/* Mensaje de Error */}
+              {error && (
+                <div className="text-red-500 text-sm text-center">{error}</div>
+              )}
 
               <Field className="pt-2">
                 <Button
