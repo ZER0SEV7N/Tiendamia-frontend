@@ -4,10 +4,12 @@ import { ProductosDataTable } from "@/app/(admin)/admin/components/Table/data-ta
 import { useTableProduct } from "../../hooks/useTableProduct";
 import { Button } from "@/components/ui/button"; // Si usas shadcn para los botones de acción
 import { Plus } from "lucide-react"; // Iconos útiles para acompañar los filtros
+import { useRouter } from "next/navigation"; // Para navegación programática al crear un nuevo producto
 import FiltrosInventario from "../../components/Table/FiltrosInventario";
 
 export default function ProductosPage() {
   const { tablaColumns, productos } = useTableProduct();
+  const router = useRouter();
 
   return (
     <div className="p-6 space-y-6 w-full animate-fade-in">
@@ -23,7 +25,10 @@ export default function ProductosPage() {
           </p>
         </div>
 
-        <Button className="bg-[#FF3C3C] hover:bg-[#E03030] text-white font-bold h-10 px-6 rounded-xl transition-colors shadow-sm shadow-red-100">
+        <Button
+          className="bg-[#FF3C3C] hover:bg-[#E03030] text-white font-bold h-10 px-6 rounded-xl transition-colors shadow-sm shadow-red-100"
+          onClick={() => router.push("/admin/productos/crear")}
+        >
           Agregar Producto <Plus className="h-4 w-4 ml-2" />
         </Button>
       </div>
