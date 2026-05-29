@@ -1,50 +1,46 @@
 "use client";
 
-import React from "react";
-import { Package, Eye, ChevronRight } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Package, ChevronRight, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-// 1. Estructura de datos simulados de compras en Tiendamia
-const ORDENES_SIMULADAS = [
-  {
-    id: "TM-984321-PE",
-    fecha: "18 de Mayo, 2026",
-    estado: "En camino",
-    estadoColor: "text-amber-600 bg-amber-50 border-amber-200",
-    total: "S/ 389.00",
-    productos: [
-      {
-        nombre: "SSD Crucial BX500 120GB 3D NAND SATA 2.5-Inch Internal SSD",
-        cantidad: 1,
-        tiendaOrigen: "Amazon EE.UU.",
-        imagen: "💻"
-      },
-      {
-        nombre: "Memoria RAM Corsair Vengeance LPX 16GB (2x8GB) DDR4 3200MHz",
-        cantidad: 1,
-        tiendaOrigen: "Amazon EE.UU.",
-        imagen: "⚡"
-      }
-    ]
-  },
-  {
-    id: "TM-951102-PE",
-    fecha: "04 de Abril, 2026",
-    estado: "Entregado",
-    estadoColor: "text-green-600 bg-green-50 border-green-200",
-    total: "S/ 1,249.00",
-    productos: [
-      {
-        nombre: "Teclado Mecánico Logitech G Pro X TKL Lightspeed Wireless",
-        cantidad: 1,
-        tiendaOrigen: "eBay EE.UU.",
-        imagen: "⌨️"
-      }
-    ]
-  }
-];
+import { getOrders, Orden } from "@/lib/user";
 
 export default function MisOrdenesView() {
+  const [ordenes, setOrdenes] = useState<Orden[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchOrdenes = async () => {
+      try {
+        const data = await getOrders();
+        setOrdenes(data);
+      } catch (err) {
+        console.error("Error cargando órdenes:", err);
+        setError("No se pudieron cargar tus órdenes");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrdenes();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="w-full max-w-4xl font-sans space-y-6 pl-2 animate-fade-in">
+        <div className="border-b border-neutral-100 pb-4">
+          <h1 className="text-3xl font-medium text-[#333333] tracking-tight">
+            Mis órdenes
+          </h1>
+        </div>
+        <div className="flex justify-center items-center py-12">
+          <Loader className="w-6 h-6 text-neutral-400 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-4xl font-sans space-y-6 pl-2 animate-fade-in">
       
@@ -54,19 +50,25 @@ export default function MisOrdenesView() {
           Mis órdenes
         </h1>
         <p className="text-sm text-neutral-500 mt-1">
-          Revisa el estado de tus compras internacionales y locales.
+          Revisa el estado de tus compras realizadas desde la base de datos.
         </p>
       </div>
 
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
       {/* Lista de Pedidos */}
       <div className="space-y-6">
-        {ORDENES_SIMULADAS.length === 0 ? (
+        {ordenes.length === 0 ? (
           <div className="text-center py-12 border border-dashed border-neutral-200 rounded-lg">
             <Package className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
             <p className="text-neutral-500 text-sm">Aún no tienes órdenes registradas.</p>
           </div>
         ) : (
-          ORDENES_SIMULADAS.map((orden) => (
+          ordenes.map((orden) => (
             <div 
               key={orden.id} 
               className="border border-neutral-200 rounded-xl bg-white overflow-hidden shadow-sm transition-all hover:shadow-md"

@@ -21,7 +21,7 @@ export default function MisDireccionesView() {
   const fetchDirecciones = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/api/usuario/direcciones");
+      const response = await api.get("/usuario/direcciones");
       setDirecciones(response.data);
       setError(null);
     } catch (err: any) {
@@ -39,7 +39,7 @@ export default function MisDireccionesView() {
 
     try {
       setDeletingId(id);
-      await api.delete(`/api/usuario/direcciones/${id}`);
+      await api.delete(`/usuario/direcciones/${id}`);
       setDirecciones(direcciones.filter((d) => d.id !== id));
     } catch (err: any) {
       console.error("Error eliminando dirección:", err);

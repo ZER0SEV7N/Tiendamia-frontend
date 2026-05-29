@@ -10,25 +10,31 @@ import { Checkbox } from "@/components/ui/checkbox";
 export default function EditarPerfilView() {
   const router = useRouter();
 
-  {/* 1. Datos simulados iniciales extraídos de image_471e06.png */}
   const [formData, setFormData] = useState({
     nombres: "",
     apellidos: "",
     correo: "",
+    telefono: "",
     cambiarPassword: false,
   });
 
   useEffect(() => {
     import('@/lib/user').then(({ getProfile }) => {
       getProfile().then((u) => {
-        setFormData({ nombres: u.nombres || '', apellidos: u.apellidos || '', correo: u.correo || '', cambiarPassword: false });
+        setFormData({ 
+          nombres: u.nombres || '', 
+          apellidos: u.apellidos || '', 
+          correo: u.correo || '', 
+          telefono: u.telefono || '',
+          cambiarPassword: false 
+        });
       }).catch(() => {});
     });
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload: any = { nombres: formData.nombres, apellidos: formData.apellidos };
+    const payload: any = { nombres: formData.nombres, apellidos: formData.apellidos, telefono: formData.telefono };
     if (formData.cambiarPassword) {
       const nueva = window.prompt('Introduce la nueva contraseña:');
       if (nueva) payload.password = nueva;
@@ -92,13 +98,25 @@ export default function EditarPerfilView() {
               />
             </div>
           </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-neutral-700">
+              Teléfono
+            </label>
+            <Input
+              type="text"
+              value={formData.telefono}
+              onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+              className="h-12 border-neutral-300 focus-visible:ring-neutral-400 bg-white rounded-md text-neutral-800"
+            />
+          </div>
         </div>
 
         {/* Campo de Email Estático / Lectura */}
         <div className="space-y-1">
           <p className="text-sm font-medium text-neutral-500">Email</p>
           <p className="text-[15px] font-normal text-neutral-800">
-            {formData.email}
+            {formData.correo}
           </p>
         </div>
 

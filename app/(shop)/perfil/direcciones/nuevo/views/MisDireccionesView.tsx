@@ -51,7 +51,7 @@ export default function NuevaDireccionView() {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await api.get("/api/usuario/me");
+        const response = await api.get("/usuario/me");
         setUserInfo(response.data);
         setFormData(prev => ({
           ...prev,
@@ -100,7 +100,7 @@ export default function NuevaDireccionView() {
         es_principal: false,
       };
 
-      const response = await api.post("/api/usuario/direcciones", direccionData);
+      const response = await api.post("/usuario/direcciones", direccionData);
       console.log("Dirección guardada con éxito:", response.data);
       router.push("/perfil/direcciones");
     } catch (err: any) {
