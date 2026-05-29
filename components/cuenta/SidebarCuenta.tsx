@@ -8,7 +8,7 @@ export default function SidebarCuenta() {
 
       <ul className="mt-6 space-y-4">
 
-        <li>Información</li>
+        <li>Información de la cuenta</li>
 
         <li>Mis órdenes</li>
 
