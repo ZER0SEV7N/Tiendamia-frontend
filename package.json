@@ -13,6 +13,7 @@
     "@icons-pack/react-simple-icons": "^13.13.0",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
+    "@supabase/supabase-js": "^2.106.2",
     "@tanstack/react-table": "^8.21.3",
     "axios": "^1.16.1",
     "class-variance-authority": "^0.7.1",

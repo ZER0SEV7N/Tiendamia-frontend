@@ -14,6 +14,8 @@ import { getMarcas } from "@/services/marca";
 import { Categoria } from "@/types/categoria/categoria";
 import { ProductoRequest } from "@/types/producto/productoList";
 import { Marca } from "@/types/marca/marca";
+import { upLoadImage } from "@/supabaseCredentials";
+import { createProducto } from "@/services/producto";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = [
@@ -83,14 +85,12 @@ export type FormValues = z.infer<typeof formSchema>;
 interface UseProductoFormProps {
   initialData?: ProductoRequest;
   isEdit: boolean;
-  onCreate?: (data: ProductoRequest) => void | Promise<string>;
   onUpdate?: (data: ProductoRequest) => void | Promise<string>;
 }
 
 export const useProductoForm = ({
   initialData,
   isEdit,
-  onCreate,
   onUpdate,
 }: UseProductoFormProps) => {
   const [categoriasData, setCategoriasData] = useState<Categoria[]>([]);
@@ -274,7 +274,7 @@ export const useProductoForm = ({
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (values) => {
-    // Validación manual de negocio si es creación pura y no hay preview ni archivo
+    // Validación manual si es creación y no hay preview
     if (!isEdit && !mainPreview) {
       form.setError("imagenArchivo", {
         message: "La imagen principal es requerimiento en nuevos productos",
@@ -282,29 +282,77 @@ export const useProductoForm = ({
       return;
     }
 
-    const productoPayload: ProductoRequest = {
-      nombre: values.nombre,
-      slug: values.slug,
-      descripcion: values.descripcion,
-      imagenUrl: mainPreview || "",
-      categoriaId: values.categoriaId,
-      marcaId: values.marcaId,
-      variaciones: values.variaciones.map((v, idx) => ({
-        codigoInventario: v.codigoInventario,
-        precio: v.precio,
-        stock: v.stock,
-        imagenUrl: variantPreviews[idx] || "",
-        caracteristicas: v.caracteristicas.map((c) => ({
-          atributoNombre: c.atributoNombre,
-          valorTexto: c.valorTexto,
-        })),
-      })),
-    };
+    try {
+      setIsLoading(true);
 
-    if (isEdit && onUpdate) {
-      onUpdate(productoPayload);
-    } else if (!isEdit && onCreate) {
-      onCreate(productoPayload);
+      // 1. Subir la imagen principal (si el usuario seleccionó un archivo nuevo)
+      let finalMainImageUrl = initialData?.imagenUrl || "";
+
+      if (values.imagenArchivo && values.imagenArchivo.length > 0) {
+        // Usamos tu helper pasándole: el File, el bucket 'productos' y la carpeta 'principales'
+        const urlSubida = await upLoadImage(
+          values.imagenArchivo[0],
+          "product-img",
+          "principales",
+        );
+        if (urlSubida) finalMainImageUrl = urlSubida;
+      }
+
+      // 2. Procesar y subir las imágenes de las variaciones en paralelo usando tu helper
+      const variacionesProcesadas = await Promise.all(
+        values.variaciones.map(async (v, idx) => {
+          // Mantiene la URL histórica si no se cambia la imagen en edición
+          let finalVariantImageUrl =
+            initialData?.variaciones?.[idx]?.imagenUrl || "";
+
+          // Si esta variación tiene un archivo cargado en su input
+          if (v.imagenArchivo && v.imagenArchivo.length > 0) {
+            const urlSubida = await upLoadImage(
+              v.imagenArchivo[0],
+              "product-img",
+              "variaciones",
+            );
+            if (urlSubida) finalVariantImageUrl = urlSubida;
+          }
+
+          return {
+            codigoInventario: v.codigoInventario,
+            precio: v.precio,
+            stock: v.stock,
+            imagenUrl: finalVariantImageUrl, // URL pública final lista
+            caracteristicas: v.caracteristicas.map((c) => ({
+              atributoNombre: c.atributoNombre,
+              valorTexto: c.valorTexto,
+            })),
+          };
+        }),
+      );
+
+      // 3. Estructurar el Payload final para Spring Boot
+      const productoPayload: ProductoRequest = {
+        nombre: values.nombre,
+        slug: values.slug,
+        descripcion: values.descripcion,
+        imagenUrl: finalMainImageUrl,
+        categoriaId: values.categoriaId,
+        marcaId: values.marcaId,
+        variaciones: variacionesProcesadas,
+      };
+
+      // 4. Enviar a tus servicios de backend de Spring Boot
+      if (isEdit && onUpdate) {
+        await onUpdate(productoPayload);
+      } else if (!isEdit && createProducto) {
+        await createProducto(productoPayload);
+      }
+    } catch (error) {
+      console.error(
+        "Error crítico al procesar el formulario de productos:",
+        error,
+      );
+      alert("Hubo un error al subir las imágenes o registrar el producto.");
+    } finally {
+      setIsLoading(false);
     }
   };
 

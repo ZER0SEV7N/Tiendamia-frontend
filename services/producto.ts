@@ -6,6 +6,11 @@ export const getProductos = async () => {
   return response.data.data;
 };
 
+export const getProductoById = async (id: string) => {
+  const response = await api.get(`/productos/detalle/${id}`);
+  return response.data.data;
+};
+
 export const createProducto = async (data: ProductoRequest) => {
   const response = await api.post("/admin/productos/create", data);
   return response.data.mensaje;
