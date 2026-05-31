@@ -1,9 +1,12 @@
+// app/auth/layout.tsx
+// Este layout se utiliza para las páginas de autenticación (login, registro, etc.)
 "use client";
 
 import { Geist, Geist_Mono, Mulish } from "next/font/google";
 import "@/app/globals.css";
 import Link from "next/link";
 import { AuthProvider } from "@/context/context";
+import { Providers } from "@/components/public/layouts/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,9 +48,9 @@ export default function RootLayout({
         </header>
 
         <main className="grow flex flex-col justify-center items-center px-4 py-8">
-          <AuthProvider>
+          <Providers>
             {children}
-          </AuthProvider>
+          </Providers>
         </main>
       </body>
     </html>

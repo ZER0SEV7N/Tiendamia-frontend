@@ -1,14 +1,26 @@
+//app/auth/login/page.tsx
+//Página de login, con formulario para ingresar email y contraseña, 
+//botón para login con Google, y un checkbox simulado de reCAPTCHA
 "use client";
 
 import Link from "next/link";
-import { SiGoogle } from "@icons-pack/react-simple-icons";
 import { Eye, EyeOff } from "lucide-react";
 import { useLogin } from "@/app/auth/hook/useLogin";
 import { useState } from "react";
+import { GoogleLogin } from '@react-oauth/google';
+import { useRouter } from "next/navigation";
 
+//La página de login se encarga de mostrar el formulario de inicio de sesión, 
+//manejar la lógica de autenticación y mostrar errores si los hay.
 export default function LoginPage() {
-  const { correo, setCorreo, password, setPassword, error, cargando, captchaChecked, setCaptchaChecked, handleSubmit, loginConGoogle } = useLogin();
+  const { 
+    correo, setCorreo, password, setPassword, 
+    error, setError, cargando, captchaChecked, setCaptchaChecked, 
+    handleSubmit, loginConGoogle 
+  } = useLogin();
+  
   const [mostrarPass, setMostrarPass] = useState(false);
+  const router = useRouter();
 
   return (
     <div className="w-full max-w-sm bg-white border border-gray-200 rounded-md p-8 shadow-sm mx-auto mt-10">
@@ -16,15 +28,31 @@ export default function LoginPage() {
         Ingresar
       </h1>
 
-      {/* Google */}
-      <button 
-        type="button"
-        onClick={() => loginConGoogle("token_simulado")} 
-        className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded py-2 text-sm text-gray-700 hover:bg-gray-50 transition mb-4"
-      >
-        <SiGoogle className="w-4 h-4" />
-        <span>Ingresar con Google</span>
-      </button>
+      <div className="w-full flex justify-center mb-4">
+        <GoogleLogin
+          width="100%"
+          theme="outline"
+          size="large"
+          text="signin_with"
+          onSuccess={async (credentialResponse) => {
+            try {
+              if (credentialResponse.credential) {
+                await loginConGoogle(credentialResponse.credential);
+                router.push("/"); 
+              }
+            } catch (err: unknown) {
+              if (err instanceof Error) {
+                setError(err.message);
+              } else {
+                setError("Error al iniciar sesión con Google.");
+              }
+            }
+          }}
+          onError={() => {
+            setError("El inicio de sesión con Google fue cancelado o falló.");
+          }}
+        />
+      </div>
 
       {/* Divisor */}
       <div className="relative flex items-center mb-4">

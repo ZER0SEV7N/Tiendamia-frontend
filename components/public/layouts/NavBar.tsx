@@ -5,15 +5,15 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { Button } from "../ui/button";
+import { Button } from "..//../ui/button";
 import { ChevronDown, ShoppingCart, Heart, Search } from "lucide-react";
-import { SiGoogle } from "@icons-pack/react-simple-icons";
 import Link from "next/link";
 import { useAuth } from "@/context/context";
 import { useRouter } from "next/navigation";
+import { GoogleLogin } from "@react-oauth/google";
 
 function NavBar() {
-  const { user: usuario, logout } = useAuth();
+  const { user: usuario, logout, loginConGoogle } = useAuth();
   const router = useRouter();
 
   const handleLogout = () => {
@@ -24,6 +24,7 @@ function NavBar() {
   return (
     <header className="w-full bg-[#FF3C3C] text-white px-4 py-3 shadow-md">
       <div className="max-w-6xl mx-auto flex items-center justify-center gap-10">
+        
         {/* LOGO */}
         <Link
           href="/"
@@ -53,6 +54,7 @@ function NavBar() {
 
         {/* BOTONES */}
         <div className="relative z-50 flex items-center gap-6 text-sm font-medium shrink-0">
+          
           {/* FAVORITOS */}
           <Button
             variant="link"
@@ -98,32 +100,42 @@ function NavBar() {
                     {usuario.correo}
                   </p>
                   <hr className="border-neutral-200" />
-                  <Link
-                    href="/perfil"
-                    className="text-sm text-gray-700 hover:text-black transition"
-                  >
+                  <Link href="/perfil" className="text-sm text-gray-700 hover:text-black transition">
                     Mi perfil
                   </Link>
-                  <Link
-                    href="/mis-pedidos"
-                    className="text-sm text-gray-700 hover:text-black transition"
-                  >
+                  <Link href="/mis-pedidos" className="text-sm text-gray-700 hover:text-black transition">
                     Mis pedidos
                   </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left text-sm text-red-500 hover:text-red-600 transition"
-                  >
+                  <button onClick={handleLogout} className="w-full text-left text-sm text-red-500 hover:text-red-600 transition">
                     Cerrar sesión
                   </button>
                 </>
               ) : (
                 // Usuario no logueado
                 <>
-                  <button className="w-full flex items-center justify-center gap-2.5 h-10 px-4 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 hover:bg-neutral-50 rounded-lg transition-colors shadow-sm">
-                    <SiGoogle />
-                    <span>Ingresar con Google</span>
-                  </button>
+                  {/* COMPONENTE OFICIAL DE GOOGLE */}
+                  <div className="w-full flex justify-center py-1">
+                    <GoogleLogin
+                      width="100%"
+                      theme="outline"
+                      size="medium" // Tamaño un poco más pequeño para el menú
+                      text="signin_with"
+                      onSuccess={async (credentialResponse) => {
+                        try {
+                          if (credentialResponse.credential) {
+                            await loginConGoogle(credentialResponse.credential);
+                            // Al ser exitoso, el Context se actualiza y React vuelve a renderizar el NavBar
+                            // mostrando automáticamente las opciones del usuario logueado.
+                          }
+                        } catch (err) {
+                          console.error("Error al iniciar sesión con Google:", err);
+                        }
+                      }}
+                      onError={() => {
+                        console.error("Inicio de sesión con Google cancelado.");
+                      }}
+                    />
+                  </div>
 
                   <div className="relative flex py-0.5 items-center">
                     <div className="grow border-t border-neutral-200"></div>
@@ -147,10 +159,7 @@ function NavBar() {
           {/* CARRITO */}
           <HoverCard openDelay={0} closeDelay={150}>
             <HoverCardTrigger asChild>
-              <Link
-                href="/carrito"
-                className="text-white bg-transparent border-none p-1 h-auto relative flex items-center justify-center cursor-pointer focus:outline-none"
-              >
+              <Link href="/carrito" className="text-white bg-transparent border-none p-1 h-auto relative flex items-center justify-center cursor-pointer focus:outline-none">
                 <span className="relative inline-block">
                   <ShoppingCart className="h-6 w-6 text-white stroke-2" />
                   <span className="absolute -top-1.5 -right-1 bg-[#FF3C3C] text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-[#FF3C3C]">
@@ -172,6 +181,7 @@ function NavBar() {
               </p>
             </HoverCardContent>
           </HoverCard>
+
         </div>
       </div>
     </header>

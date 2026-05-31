@@ -28,12 +28,12 @@ export type Orden = {
 };
 
 export async function getProfile(): Promise<UserProfile> {
-  const { data } = await api.get('/usuario/me');
+  const { data } = await api.get('/auth/perfil');
   return data as UserProfile;
 }
 
 export async function updateProfile(payload: Partial<UserProfile & { password?: string }>) {
-  const { data } = await api.patch('/usuario/me', payload);
+  const { data } = await api.patch('/auth/perfil', payload);
   return data;
 }
 

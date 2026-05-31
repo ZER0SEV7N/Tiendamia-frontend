@@ -61,9 +61,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  //Función para iniciar sesión con Google
   const loginConGoogle = async (googleToken: string) => {
     try {
-      const { data } = await api.post("/auth/google", { token: googleToken });
+      const { data } = await api.post("/auth/google", { idToken: googleToken });
 
       const payload = data.data;
       const jwt = payload.token;
