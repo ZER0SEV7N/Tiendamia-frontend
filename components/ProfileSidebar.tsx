@@ -19,7 +19,7 @@ export default function ProfileSidebar() {
     { name: "Información de la cuenta", href: "/perfil", icon: User },
     { name: "Mis órdenes", href: "/perfil/ordenes", icon: ShoppingBag },
     { name: "Devoluciones", href: "/perfil/devoluciones", icon: RefreshCw },
-    { name: "Mis direcciones", href: "/perfil/direcciones", icon: MapPin }, // 👈 Tu ruta actual
+    { name: "Mis direcciones", href: "/perfil/direcciones", icon: MapPin }, // 
     { name: "Mi billetera", href: "/perfil/billetera", icon: Wallet },
     { name: "Invita y gana", href: "/perfil/invita", icon: Gift },
     { name: "Favoritos", href: "/perfil/favoritos", icon: Heart },
