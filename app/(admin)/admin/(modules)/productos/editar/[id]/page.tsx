@@ -5,7 +5,7 @@ import { ProductoForm } from "@/app/(admin)/admin/components/FormProducto";
 function page() {
   return (
     <div>
-      <ProductoForm isEdit={false} />
+      <ProductoForm isEdit={true} />
     </div>
   );
 }

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
 import { Control, FormProvider } from "react-hook-form";
 import {
   Plus,
@@ -172,7 +171,6 @@ export const ProductoForm = ({
   } = useProductoForm({
     initialData,
     isEdit,
-    onCreate,
     onUpdate,
   });
 

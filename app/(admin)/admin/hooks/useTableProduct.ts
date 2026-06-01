@@ -1,9 +1,12 @@
+import { useRouter } from "next/navigation";
 import { columns } from "../components/Table/columns";
 
 export const useTableProduct = () => {
+  const router = useRouter();
+
   const handleEdit = (id: number) => {
     console.log("Redirigiendo a editar producto ID:", id);
-    // Aquí usarás: router.push(`/admin/productos/${id}`)
+    router.push(`/admin/productos/editar/${id}`);
   };
 
   const handleDelete = (id: number) => {
