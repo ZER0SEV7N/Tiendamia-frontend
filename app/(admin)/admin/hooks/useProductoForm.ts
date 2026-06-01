@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/incompatible-library */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useMemo, type ChangeEvent } from "react";
@@ -12,12 +13,18 @@ import * as z from "zod";
 import { getAllCategorias } from "@/services/categoria";
 import { getMarcas } from "@/services/marca";
 import { Categoria } from "@/types/categoria/categoria";
-import { ProductoRequest } from "@/types/producto/productoList";
+import { ProductoRequest } from "@/types/producto/productoList"; // Asegúrate de que apunte a tus tipos nuevos
 import { Marca } from "@/types/marca/marca";
 import { upLoadImage } from "@/supabaseCredentials";
-import { createProducto } from "@/services/producto";
+import {
+  createProducto,
+  getProductoById,
+  updateProducto,
+  createVariacion,
+  updateVariacion,
+} from "@/services/producto";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = [
   "image/jpeg",
   "image/png",
@@ -25,7 +32,6 @@ const ACCEPTED_IMAGE_TYPES = [
   "image/jpg",
 ];
 
-// Validación flexible: Obligatoria solo si no hay una URL previa (Edición)
 const schemaImagenOpcional = z
   .any()
   .optional()
@@ -79,23 +85,29 @@ const formSchema = z.object({
     .min(1, "Debe tener al menos una variación"),
 });
 
-// CAMBIO CLAVE: Usamos infer en lugar de input para que los tipos coerced sean number
 export type FormValues = z.infer<typeof formSchema>;
 
 interface UseProductoFormProps {
-  initialData?: ProductoRequest;
+  productoId?: string;
   isEdit: boolean;
-  onUpdate?: (data: ProductoRequest) => void | Promise<string>;
+  onSuccess?: () => void;
 }
 
 export const useProductoForm = ({
-  initialData,
+  productoId,
   isEdit,
-  onUpdate,
+  onSuccess,
 }: UseProductoFormProps) => {
   const [categoriasData, setCategoriasData] = useState<Categoria[]>([]);
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const [skusOriginales, setSkusOriginales] = useState<string[]>([]);
+  const [urlImagenMaestraOriginal, setUrlImagenMaestraOriginal] =
+    useState<string>("");
+  const [urlsVariacionesOriginales, setUrlsVariacionesOriginales] = useState<
+    Record<string, string>
+  >({});
 
   const [mainPreview, setMainPreview] = useState<string | null>(null);
   const [variantPreviews, setVariantPreviews] = useState<
@@ -103,8 +115,6 @@ export const useProductoForm = ({
   >({});
 
   const form = useForm<FormValues>({
-    // Cast resolver para evitar incompatibilidades de tipos entre instalaciones
-    // de `react-hook-form` o diferencias en los tipos inferidos por zodResolver.
     resolver: zodResolver(formSchema) as unknown as Resolver<FormValues>,
     defaultValues: {
       nombre: "",
@@ -137,106 +147,10 @@ export const useProductoForm = ({
     name: "variaciones",
   });
 
-  // Escuchamos cambios en la cascada para limpiar limpiamente los hijos caídos
   const padreIdSeleccionado = form.watch("categoriaPadreId");
   const hijaIdSeleccionada = form.watch("categoriaHijaId");
 
-  // Resetear selectores dependientes cuando cambia el padre
-  useEffect(() => {
-    if (form.formState.isDirty || isEdit) {
-      // Evita dispararse en la primera carga asíncrona de edición
-      const currentHija = form.getValues("categoriaHijaId");
-      if (
-        currentHija &&
-        !opcionesHija.some((h) => String(h.id) === currentHija)
-      ) {
-        form.setValue("categoriaHijaId", "");
-        form.setValue("categoriaId", undefined as unknown as number);
-      }
-    }
-  }, [padreIdSeleccionado]);
-
-  // Resetear selector dependiente cuando cambia la hija
-  useEffect(() => {
-    if (form.formState.isDirty || isEdit) {
-      const currentNieta = form.getValues("categoriaId");
-      if (currentNieta && !opcionesNieta.some((n) => n.id === currentNieta)) {
-        form.setValue("categoriaId", undefined as unknown as number);
-      }
-    }
-  }, [hijaIdSeleccionada]);
-
-  // 1. Carga inicial de catálogos
-  useEffect(() => {
-    const cargarDatosIniciales = async () => {
-      try {
-        setIsLoading(true);
-        const [resCats, resMarcas] = await Promise.all([
-          getAllCategorias(),
-          getMarcas(),
-        ]);
-        setCategoriasData(resCats.data || []);
-        setMarcas(resMarcas.data || []);
-      } catch (error) {
-        console.error("Error al cargar catálogos del formulario:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    cargarDatosIniciales();
-  }, []);
-
-  // 2. Hidratación en modo Edición
-  useEffect(() => {
-    if (isEdit && initialData && categoriasData.length > 0) {
-      let padreId = "";
-      let hijaId = "";
-      const nietaId = initialData.categoriaId;
-
-      for (const padre of categoriasData) {
-        if (padre.subcategorias) {
-          for (const hija of padre.subcategorias) {
-            if (hija.subcategorias?.some((nieta) => nieta.id === nietaId)) {
-              padreId = String(padre.id);
-              hijaId = String(hija.id);
-              break;
-            }
-          }
-        }
-        if (padreId) break;
-      }
-
-      form.reset({
-        nombre: initialData.nombre,
-        slug: initialData.slug,
-        descripcion: initialData.descripcion,
-        categoriaPadreId: padreId,
-        categoriaHijaId: hijaId,
-        categoriaId: nietaId,
-        marcaId: initialData.marcaId,
-        estado: true,
-        variaciones: initialData.variaciones.map((v) => ({
-          codigoInventario: v.codigoInventario,
-          precio: v.precio,
-          stock: v.stock,
-          caracteristicas: v.caracteristicas,
-          isNewInDb: false,
-        })),
-      });
-
-      if (initialData.imagenUrl) setMainPreview(initialData.imagenUrl);
-
-      const existingPreviews: Record<number, string> = {};
-      initialData.variaciones?.forEach((v, idx) => {
-        if (v.imagenUrl) existingPreviews[idx] = v.imagenUrl;
-      });
-      setVariantPreviews(existingPreviews);
-    }
-  }, [initialData, isEdit, categoriasData]);
-
-  // Filtros en Cascada (useMemo)
   const opcionesPadre = categoriasData;
-
   const opcionesHija = useMemo(() => {
     if (!padreIdSeleccionado) return [];
     return (
@@ -253,7 +167,125 @@ export const useProductoForm = ({
     );
   }, [hijaIdSeleccionada, opcionesHija]);
 
-  // Manejo de imágenes (Previews)
+  useEffect(() => {
+    if (form.formState.isDirty || isEdit) {
+      const currentHija = form.getValues("categoriaHijaId");
+      if (
+        currentHija &&
+        !opcionesHija.some((h) => String(h.id) === currentHija)
+      ) {
+        form.setValue("categoriaHijaId", "");
+        form.setValue("categoriaId", undefined as unknown as number);
+      }
+    }
+  }, [padreIdSeleccionado]);
+
+  useEffect(() => {
+    if (form.formState.isDirty || isEdit) {
+      const currentNieta = form.getValues("categoriaId");
+      if (currentNieta && !opcionesNieta.some((n) => n.id === currentNieta)) {
+        form.setValue("categoriaId", undefined as unknown as number);
+      }
+    }
+  }, [hijaIdSeleccionada]);
+
+  useEffect(() => {
+    const cargarTodo = async () => {
+      try {
+        setIsLoading(true);
+        const [resCats, resMarcas] = await Promise.all([
+          getAllCategorias(),
+          getMarcas(),
+        ]);
+        const cats = resCats.data || [];
+        setCategoriasData(cats);
+        setMarcas(resMarcas.data || []);
+
+        if (isEdit && productoId) {
+          const productoDetalle = await getProductoById(productoId);
+
+          if (productoDetalle) {
+            setUrlImagenMaestraOriginal(productoDetalle.imagenUrl || "");
+            if (productoDetalle.imagenUrl)
+              setMainPreview(productoDetalle.imagenUrl);
+
+            const skus: string[] = [];
+            const urlsOriginalesVar: Record<string, string> = {};
+            const existingPreviews: Record<number, string> = {};
+
+            productoDetalle.variaciones?.forEach((v: any, idx: number) => {
+              if (v.codigoInventario) {
+                skus.push(v.codigoInventario);
+                urlsOriginalesVar[v.codigoInventario] = v.imagenUrl || "";
+              }
+              if (v.imagenUrl) existingPreviews[idx] = v.imagenUrl;
+            });
+
+            setSkusOriginales(skus);
+            setUrlsVariacionesOriginales(urlsOriginalesVar);
+            setVariantPreviews(existingPreviews);
+
+            let padreId = "";
+            let hijaId = "";
+            const nietaId = productoDetalle.categoriaId;
+
+            for (const padre of cats) {
+              if (padre.subcategorias) {
+                for (const hija of padre.subcategorias) {
+                  if (
+                    hija.subcategorias?.some(
+                      (nieta: any) => nieta.id === nietaId,
+                    )
+                  ) {
+                    padreId = String(padre.id);
+                    hijaId = String(hija.id);
+                    break;
+                  }
+                }
+              }
+              if (padreId) break;
+            }
+
+            form.reset({
+              nombre: productoDetalle.nombre,
+              slug: productoDetalle.slug,
+              descripcion: productoDetalle.descripcion,
+              categoriaPadreId: padreId,
+              categoriaHijaId: hijaId,
+              categoriaId: nietaId,
+              marcaId: productoDetalle.marcaId,
+              estado: productoDetalle.estado ?? true,
+              variaciones: productoDetalle.variaciones
+                ? productoDetalle.variaciones.map((v: any) => ({
+                    codigoInventario: v.codigoInventario,
+                    precio: v.precio,
+                    stock: v.stock,
+                    isNewInDb: false,
+                    // CORRECCIÓN: Adaptamos cualquier variación del backend al tipado estricto
+                    caracteristicas: v.caracteristicas
+                      ? v.caracteristicas.map((c: any) => ({
+                          atributoNombre: c.atributoNombre || c.atributo || "",
+                          valorTexto: c.valorTexto || c.valor || "",
+                        }))
+                      : [],
+                  }))
+                : [],
+            });
+          }
+        }
+      } catch (error) {
+        console.error(
+          "Error al inicializar el ecosistema del formulario:",
+          error,
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    cargarTodo();
+  }, [productoId, isEdit]);
+
   const handleImageChange = (
     e: ChangeEvent<HTMLInputElement>,
     onChange: (...event: unknown[]) => void,
@@ -264,7 +296,6 @@ export const useProductoForm = ({
     if (files && files.length > 0) {
       onChange(files);
       const fileUrl = URL.createObjectURL(files[0]);
-
       if (type === "main") {
         setMainPreview(fileUrl);
       } else if (type === "variant" && typeof index === "number") {
@@ -274,7 +305,6 @@ export const useProductoForm = ({
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (values) => {
-    // Validación manual si es creación y no hay preview
     if (!isEdit && !mainPreview) {
       form.setError("imagenArchivo", {
         message: "La imagen principal es requerimiento en nuevos productos",
@@ -285,11 +315,8 @@ export const useProductoForm = ({
     try {
       setIsLoading(true);
 
-      // 1. Subir la imagen principal (si el usuario seleccionó un archivo nuevo)
-      let finalMainImageUrl = initialData?.imagenUrl || "";
-
+      let finalMainImageUrl = urlImagenMaestraOriginal;
       if (values.imagenArchivo && values.imagenArchivo.length > 0) {
-        // Usamos tu helper pasándole: el File, el bucket 'productos' y la carpeta 'principales'
         const urlSubida = await upLoadImage(
           values.imagenArchivo[0],
           "product-img",
@@ -298,14 +325,12 @@ export const useProductoForm = ({
         if (urlSubida) finalMainImageUrl = urlSubida;
       }
 
-      // 2. Procesar y subir las imágenes de las variaciones en paralelo usando tu helper
+      // CORRECCIÓN: Estructuramos exactamente igual a VariacionRequest y CaracteristicaRequest
       const variacionesProcesadas = await Promise.all(
-        values.variaciones.map(async (v, idx) => {
-          // Mantiene la URL histórica si no se cambia la imagen en edición
+        values.variaciones.map(async (v) => {
           let finalVariantImageUrl =
-            initialData?.variaciones?.[idx]?.imagenUrl || "";
+            urlsVariacionesOriginales[v.codigoInventario] || "";
 
-          // Si esta variación tiene un archivo cargado en su input
           if (v.imagenArchivo && v.imagenArchivo.length > 0) {
             const urlSubida = await upLoadImage(
               v.imagenArchivo[0],
@@ -319,7 +344,8 @@ export const useProductoForm = ({
             codigoInventario: v.codigoInventario,
             precio: v.precio,
             stock: v.stock,
-            imagenUrl: finalVariantImageUrl, // URL pública final lista
+            imagenUrl: finalVariantImageUrl,
+            // Aquí enviamos exactamente las propiedades requeridas por CaracteristicaRequest
             caracteristicas: v.caracteristicas.map((c) => ({
               atributoNombre: c.atributoNombre,
               valorTexto: c.valorTexto,
@@ -328,38 +354,66 @@ export const useProductoForm = ({
         }),
       );
 
-      // 3. Estructurar el Payload final para Spring Boot
-      const productoPayload: ProductoRequest = {
-        nombre: values.nombre,
-        slug: values.slug,
-        descripcion: values.descripcion,
-        imagenUrl: finalMainImageUrl,
-        categoriaId: values.categoriaId,
-        marcaId: values.marcaId,
-        variaciones: variacionesProcesadas,
-      };
+      if (isEdit && productoId) {
+        const idNumerico = Number(productoId);
 
-      // 4. Enviar a tus servicios de backend de Spring Boot
-      if (isEdit && onUpdate) {
-        await onUpdate(productoPayload);
-      } else if (!isEdit && createProducto) {
+        await updateProducto(
+          idNumerico,
+          values.categoriaId,
+          values.marcaId,
+          values.nombre,
+          values.slug,
+          finalMainImageUrl,
+          values.descripcion,
+          values.estado,
+        );
+
+        const peticionesVariaciones = variacionesProcesadas.map((variacion) => {
+          const esExistente = skusOriginales.includes(
+            variacion.codigoInventario,
+          );
+
+          if (esExistente) {
+            return updateVariacion(variacion.codigoInventario, variacion);
+          } else {
+            return createVariacion(idNumerico, variacion);
+          }
+        });
+
+        await Promise.all(peticionesVariaciones);
+        alert("¡Producto y variaciones actualizados correctamente!");
+      } else {
+        // CORRECCIÓN: Cumple al 100% con la interfaz ProductoRequest sin usar 'as any'
+        const productoPayload: ProductoRequest = {
+          nombre: values.nombre,
+          slug: values.slug,
+          descripcion: values.descripcion,
+          imagenUrl: finalMainImageUrl,
+          estado: values.estado,
+          categoriaId: values.categoriaId,
+          marcaId: values.marcaId,
+          variaciones: variacionesProcesadas, // Ya coincide perfectamente con VariacionRequest[]
+        };
+
         await createProducto(productoPayload);
+        alert("¡Producto registrado con éxito!");
       }
+
+      if (onSuccess) onSuccess();
     } catch (error) {
       console.error(
-        "Error crítico al procesar el formulario de productos:",
+        "Error crítico procesando los endpoints del producto:",
         error,
       );
-      alert("Hubo un error al subir las imágenes o registrar el producto.");
+      alert("Hubo un error al intentar guardar los cambios.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // El submit handler que se expone al componente ya viene con la firma correcta para react-hook-form
-  const submitHandler: ReturnType<typeof form.handleSubmit> =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form.handleSubmit(onSubmit as unknown as SubmitHandler<any>);
+  const submitHandler: ReturnType<typeof form.handleSubmit> = form.handleSubmit(
+    onSubmit as unknown as SubmitHandler<any>,
+  );
 
   const handleRemoveVariant = (index: number) => {
     if (!isEdit && variantFields.length === 1) return;

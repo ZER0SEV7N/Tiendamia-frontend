@@ -14,6 +14,7 @@ export interface ProductoRequest {
   slug: string;
   descripcion: string;
   imagenUrl: string;
+  estado?: boolean;
   categoriaId: number;
   marcaId: number;
   variaciones: VariacionRequest[];
