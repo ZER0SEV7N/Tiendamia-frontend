@@ -1,7 +1,13 @@
 import { useRouter } from "next/navigation";
 import { columns } from "../components/Table/columns";
+import { cambiarEstado } from "@/services/producto";
+import { ProductoList } from "@/types/producto/productoList";
 
-export const useTableProduct = () => {
+interface UseTableProductProps {
+  setProductos: React.Dispatch<React.SetStateAction<ProductoList[]>>;
+}
+
+export const useTableProduct = ({ setProductos }: UseTableProductProps) => {
   const router = useRouter();
 
   const handleEdit = (id: number) => {
@@ -13,9 +19,19 @@ export const useTableProduct = () => {
     console.log("Abriendo modal de confirmación para eliminar ID:", id);
   };
 
-  const handleStatusChange = (id: number, nuevoEstado: boolean) => {
-    console.log(`Cambiando estado de producto ${id} a:`, nuevoEstado);
-    // Aquí harás tu api.patch(`/productos/${id}/estado`, { estado: nuevoEstado })
+  const handleStatusChange = async (id: number, nuevoEstado: boolean) => {
+    try {
+      await cambiarEstado(id, nuevoEstado);
+      setProductos((prevProductos) =>
+        prevProductos.map((p) =>
+          p.id === id ? { ...p, estado: nuevoEstado } : p,
+        ),
+      );
+      router.refresh();
+    } catch (error) {
+      console.error("Error al actualizar el estado en el servidor:", error);
+      alert("No se pudo cambiar el estado del producto.");
+    }
   };
 
   const tablaColumns = columns(handleEdit, handleDelete, handleStatusChange);

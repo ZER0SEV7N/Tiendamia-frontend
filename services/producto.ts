@@ -59,3 +59,10 @@ export const updateVariacion = async (
   );
   return response.data.mensaje;
 };
+
+export const cambiarEstado = async (id: number, estado: boolean) => {
+  const response = await api.put(`/admin/productos/estado/${id}`, {
+    estado,
+  });
+  return response.data.mensaje;
+};

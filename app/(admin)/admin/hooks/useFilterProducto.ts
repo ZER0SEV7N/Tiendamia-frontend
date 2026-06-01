@@ -179,6 +179,7 @@ export const useFilterProducto = () => {
     opcionesPadre,
     opcionesHija,
     opcionesNieta,
+    setProductos,
     productosFiltrados,
     handlePadreChange,
     handleHijaChange,

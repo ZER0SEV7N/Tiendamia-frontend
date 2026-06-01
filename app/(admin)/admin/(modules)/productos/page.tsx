@@ -9,7 +9,6 @@ import FiltrosInventario from "../../components/Table/FiltrosInventario";
 import { useFilterProducto } from "../../hooks/useFilterProducto";
 
 export default function ProductosPage() {
-  const { tablaColumns } = useTableProduct();
   const {
     busqueda,
     setBusqueda,
@@ -21,12 +20,14 @@ export default function ProductosPage() {
     opcionesPadre,
     opcionesHija,
     opcionesNieta,
+    setProductos,
     productosFiltrados,
     handlePadreChange,
     handleHijaChange,
     handleNietaChange,
     handleAplicarFiltros,
   } = useFilterProducto();
+  const { tablaColumns } = useTableProduct({ setProductos });
   const router = useRouter();
 
   return (
