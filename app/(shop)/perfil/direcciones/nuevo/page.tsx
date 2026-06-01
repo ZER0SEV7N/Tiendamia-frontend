@@ -1,8 +1,4 @@
-import NuevaDireccionView from "./views/NuevaDireccionView";
-
-export const metadata = {
-  title: "Agregar nueva dirección - Tiendamia",
-};
+import NuevaDireccionView from "./views/MisDireccionesView";
 
 export default function NuevaDireccionPage() {
   return <NuevaDireccionView />;

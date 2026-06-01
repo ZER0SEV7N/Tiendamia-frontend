@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,19 +11,36 @@ interface FormularioProps {
 }
 
 export default function FormularioEditarView({ onRegresar }: FormularioProps) {
-  // Datos simulados extraídos exactamente de image_4782eb.png
   const [formData, setFormData] = useState({
-    nombres: "Edson Leonardo",
-    apellidos: "Rojas Cabia",
-    email: "edsonleonardorojascabia@gmail.com",
+    nombres: "",
+    apellidos: "",
+    correo: "",
+    telefono: "",
     cambiarPassword: false,
   });
 
+  useEffect(() => {
+    import('@/lib/user').then(({ getProfile }) => {
+      getProfile().then((u) => {
+        setFormData((s) => ({ ...s, nombres: u.nombres || '', apellidos: u.apellidos || '', correo: u.correo || '', telefono: u.telefono || '' }));
+      }).catch(() => {
+        // no action on failure here
+      });
+    });
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Cambios guardados con éxito:", formData);
-    // Al guardar, regresa de forma automática al estado de lectura
-    onRegresar();
+    // Si el usuario pide cambiar contraseña, pedimos la nueva
+    const payload: any = { nombres: formData.nombres, apellidos: formData.apellidos, telefono: formData.telefono };
+    if (formData.cambiarPassword) {
+      const nueva = window.prompt('Introduce la nueva contraseña:');
+      if (nueva) payload.password = nueva;
+    }
+
+    import('@/lib/user').then(({ updateProfile }) => {
+      updateProfile(payload).then(() => onRegresar());
+    });
   };
 
   return (
@@ -85,7 +102,7 @@ export default function FormularioEditarView({ onRegresar }: FormularioProps) {
         <div className="space-y-1">
           <p className="text-sm font-medium text-neutral-500">Email</p>
           <p className="text-[15px] font-normal text-neutral-800">
-            {formData.email}
+            {formData.correo}
           </p>
         </div>
 

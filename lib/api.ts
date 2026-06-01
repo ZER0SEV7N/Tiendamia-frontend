@@ -1,24 +1,23 @@
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: "http://localhost:8080/api",
   headers: {
-    "Content-Type": "application/json"
-  }
+    "Content-Type": "application/json",
+  },
 });
 
 api.interceptors.request.use(
   (config) => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
-      if (token)
-        config.headers['Authorization'] = `Bearer ${token}`;
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("tiendamia_token");
+      if (token) config.headers["Authorization"] = `Bearer ${token}`;
       if (config.data instanceof FormData)
-        delete config.headers['Content-Type'];
+        delete config.headers["Content-Type"];
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 api.interceptors.response.use(
@@ -26,13 +25,16 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       const originalRequestUrl = error.config.url;
-      if (typeof window !== 'undefined' && !originalRequestUrl.includes('/auth/login')) {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
+      if (
+        typeof window !== "undefined" &&
+        !originalRequestUrl.includes("/auth/login")
+      ) {
+        localStorage.removeItem("token");
+        window.location.href = "/auth/login";
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

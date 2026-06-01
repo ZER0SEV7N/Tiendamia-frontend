@@ -1,8 +1,10 @@
 "use client";
 
 import { Geist, Geist_Mono, Mulish } from "next/font/google";
-import Footer from "@/components/public/Footer";
-import SideBar from "@/components/public/SideBar";
+import Footer from "@/components/public/layouts/Footer";
+import NavBar from "@/components/public/layouts/NavBar";
+import { AuthProvider } from "@/context/context";
+import { Providers } from "@/components/public/layouts/Providers";
 import "@/app/globals.css";
 
 const geistSans = Geist({
@@ -28,13 +30,16 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="es"
       className={`${geistSans.variable} ${geistMono.variable} ${mulish.className} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-gray-50">
-        <SideBar />
-
-        <main className="grow flex flex-col">{children}</main>
+        <main className="grow flex flex-col">
+          <Providers>
+            <NavBar />
+            {children}
+          </Providers>
+        </main>
 
         <Footer />
       </body>
