@@ -13,7 +13,7 @@ import * as z from "zod";
 import { getAllCategorias } from "@/services/categoria";
 import { getMarcas } from "@/services/marca";
 import { Categoria } from "@/types/categoria/categoria";
-import { ProductoRequest } from "@/types/producto/productoList";
+import { ProductoRequest } from "@/types/producto/productoList"; // Asegúrate de que apunte a tus tipos nuevos
 import { Marca } from "@/types/marca/marca";
 import { upLoadImage } from "@/supabaseCredentials";
 import {
@@ -22,7 +22,7 @@ import {
   updateProducto,
   createVariacion,
   updateVariacion,
-} from "@/services/producto"; // Asegúrate de importar todos los servicios aquí
+} from "@/services/producto";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = [
@@ -88,9 +88,9 @@ const formSchema = z.object({
 export type FormValues = z.infer<typeof formSchema>;
 
 interface UseProductoFormProps {
-  productoId?: string; // CAMBIO: Recibimos el id opcional desde la URL
+  productoId?: string;
   isEdit: boolean;
-  onSuccess?: () => void; // Callback opcional para redireccionar tras guardar
+  onSuccess?: () => void;
 }
 
 export const useProductoForm = ({
@@ -102,12 +102,9 @@ export const useProductoForm = ({
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Guardaremos aquí los SKUs iniciales que vinieron del backend para saber cuáles editar y cuáles crear
   const [skusOriginales, setSkusOriginales] = useState<string[]>([]);
-  // Guardamos la URL histórica por si el usuario no cambia la foto maestra en edición
   const [urlImagenMaestraOriginal, setUrlImagenMaestraOriginal] =
     useState<string>("");
-  // Guardamos las URLs históricas de las variaciones originales
   const [urlsVariacionesOriginales, setUrlsVariacionesOriginales] = useState<
     Record<string, string>
   >({});
@@ -153,7 +150,6 @@ export const useProductoForm = ({
   const padreIdSeleccionado = form.watch("categoriaPadreId");
   const hijaIdSeleccionada = form.watch("categoriaHijaId");
 
-  // Filtros en Cascada
   const opcionesPadre = categoriasData;
   const opcionesHija = useMemo(() => {
     if (!padreIdSeleccionado) return [];
@@ -171,7 +167,6 @@ export const useProductoForm = ({
     );
   }, [hijaIdSeleccionada, opcionesHija]);
 
-  // Limpieza de cascada selectores hijos
   useEffect(() => {
     if (form.formState.isDirty || isEdit) {
       const currentHija = form.getValues("categoriaHijaId");
@@ -194,12 +189,10 @@ export const useProductoForm = ({
     }
   }, [hijaIdSeleccionada]);
 
-  // Carga unificada de catálogos y de datos del producto (si es Edición)
   useEffect(() => {
     const cargarTodo = async () => {
       try {
         setIsLoading(true);
-        // 1. Cargamos catálogos obligatorios primero
         const [resCats, resMarcas] = await Promise.all([
           getAllCategorias(),
           getMarcas(),
@@ -208,7 +201,6 @@ export const useProductoForm = ({
         setCategoriasData(cats);
         setMarcas(resMarcas.data || []);
 
-        // 2. Si estamos editando y hay un ID, consultamos el detalle en el mismo flujo
         if (isEdit && productoId) {
           const productoDetalle = await getProductoById(productoId);
 
@@ -217,7 +209,6 @@ export const useProductoForm = ({
             if (productoDetalle.imagenUrl)
               setMainPreview(productoDetalle.imagenUrl);
 
-            // Mapeamos los SKUs y las imágenes originales de las variaciones
             const skus: string[] = [];
             const urlsOriginalesVar: Record<string, string> = {};
             const existingPreviews: Record<number, string> = {};
@@ -234,7 +225,6 @@ export const useProductoForm = ({
             setUrlsVariacionesOriginales(urlsOriginalesVar);
             setVariantPreviews(existingPreviews);
 
-            // Encontrar categorías padre e hija en la estructura de árbol para la cascada
             let padreId = "";
             let hijaId = "";
             const nietaId = productoDetalle.categoriaId;
@@ -244,7 +234,7 @@ export const useProductoForm = ({
                 for (const hija of padre.subcategorias) {
                   if (
                     hija.subcategorias?.some(
-                      (nieta: { id: unknown }) => nieta.id === nietaId,
+                      (nieta: any) => nieta.id === nietaId,
                     )
                   ) {
                     padreId = String(padre.id);
@@ -256,7 +246,6 @@ export const useProductoForm = ({
               if (padreId) break;
             }
 
-            // Hidratamos el formulario con los datos recuperados del backend
             form.reset({
               nombre: productoDetalle.nombre,
               slug: productoDetalle.slug,
@@ -267,13 +256,18 @@ export const useProductoForm = ({
               marcaId: productoDetalle.marcaId,
               estado: productoDetalle.estado ?? true,
               variaciones: productoDetalle.variaciones
-                ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  productoDetalle.variaciones.map((v: any) => ({
+                ? productoDetalle.variaciones.map((v: any) => ({
                     codigoInventario: v.codigoInventario,
                     precio: v.precio,
                     stock: v.stock,
-                    caracteristicas: v.caracteristicas || [],
                     isNewInDb: false,
+                    // CORRECCIÓN: Adaptamos cualquier variación del backend al tipado estricto
+                    caracteristicas: v.caracteristicas
+                      ? v.caracteristicas.map((c: any) => ({
+                          atributoNombre: c.atributoNombre || c.atributo || "",
+                          valorTexto: c.valorTexto || c.valor || "",
+                        }))
+                      : [],
                   }))
                 : [],
             });
@@ -310,7 +304,6 @@ export const useProductoForm = ({
     }
   };
 
-  // SUBMIT HANDLER CENTRALIZADO EN EL HOOK
   const onSubmit: SubmitHandler<FormValues> = async (values) => {
     if (!isEdit && !mainPreview) {
       form.setError("imagenArchivo", {
@@ -322,7 +315,6 @@ export const useProductoForm = ({
     try {
       setIsLoading(true);
 
-      // 1. Gestión de Imagen Principal (Supabase)
       let finalMainImageUrl = urlImagenMaestraOriginal;
       if (values.imagenArchivo && values.imagenArchivo.length > 0) {
         const urlSubida = await upLoadImage(
@@ -333,7 +325,7 @@ export const useProductoForm = ({
         if (urlSubida) finalMainImageUrl = urlSubida;
       }
 
-      // 2. Procesar imágenes de variaciones una por una
+      // CORRECCIÓN: Estructuramos exactamente igual a VariacionRequest y CaracteristicaRequest
       const variacionesProcesadas = await Promise.all(
         values.variaciones.map(async (v) => {
           let finalVariantImageUrl =
@@ -353,6 +345,7 @@ export const useProductoForm = ({
             precio: v.precio,
             stock: v.stock,
             imagenUrl: finalVariantImageUrl,
+            // Aquí enviamos exactamente las propiedades requeridas por CaracteristicaRequest
             caracteristicas: v.caracteristicas.map((c) => ({
               atributoNombre: c.atributoNombre,
               valorTexto: c.valorTexto,
@@ -361,11 +354,9 @@ export const useProductoForm = ({
         }),
       );
 
-      // 3. Orquestación según el modo de Guardado
       if (isEdit && productoId) {
         const idNumerico = Number(productoId);
 
-        // A. Golpeamos el endpoint para actualizar el Producto Base
         await updateProducto(
           idNumerico,
           values.categoriaId,
@@ -377,40 +368,37 @@ export const useProductoForm = ({
           values.estado,
         );
 
-        // B. Mapeamos variaciones y disparamos de forma dinámica sus respectivos endpoints
         const peticionesVariaciones = variacionesProcesadas.map((variacion) => {
           const esExistente = skusOriginales.includes(
             variacion.codigoInventario,
           );
 
           if (esExistente) {
-            // Endpoint para actualizar variación existente
             return updateVariacion(variacion.codigoInventario, variacion);
           } else {
-            // Endpoint para crear una variación nueva en este producto
             return createVariacion(idNumerico, variacion);
           }
         });
 
-        // Ejecutar los procesos de las variantes en paralelo
         await Promise.all(peticionesVariaciones);
         alert("¡Producto y variaciones actualizados correctamente!");
       } else {
-        // C. Modo Creación Tradicional (Todo junto)
+        // CORRECCIÓN: Cumple al 100% con la interfaz ProductoRequest sin usar 'as any'
         const productoPayload: ProductoRequest = {
           nombre: values.nombre,
           slug: values.slug,
           descripcion: values.descripcion,
           imagenUrl: finalMainImageUrl,
+          estado: values.estado,
           categoriaId: values.categoriaId,
           marcaId: values.marcaId,
-          variaciones: variacionesProcesadas,
+          variaciones: variacionesProcesadas, // Ya coincide perfectamente con VariacionRequest[]
         };
+
         await createProducto(productoPayload);
         alert("¡Producto registrado con éxito!");
       }
 
-      // Ejecutar callback de éxito (por ejemplo, redireccionar)
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error(

@@ -42,7 +42,10 @@ export const updateProducto = async (
 };
 
 export const createVariacion = async (id: number, data: VariacionRequest) => {
-  const response = await api.post(`/admin/variacion/create/${id}`, data);
+  const response = await api.post(
+    `/admin/productos/variacion/create/${id}`,
+    data,
+  );
   return response.data.mensaje;
 };
 
@@ -51,7 +54,7 @@ export const updateVariacion = async (
   data: VariacionRequest,
 ) => {
   const response = await api.post(
-    `/admin/variacion/update/${cdgoInventario}`,
+    `/admin/productos/variacion/update/${cdgoInventario}`,
     data,
   );
   return response.data.mensaje;
