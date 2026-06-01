@@ -30,11 +30,13 @@ import {
 import { ProductoRequest } from "@/types/producto/productoList";
 
 interface ProductoFormProps {
+  productoId?: number;
   initialData?: ProductoRequest;
   isEdit?: boolean;
   onCreate?: (data: ProductoRequest) => void | Promise<string>;
   onUpdate?: (data: ProductoRequest) => void | Promise<string>;
   onOpenModalNuevaMarca?: () => void;
+  onSuccessSave?: () => void;
 }
 
 // =========================================================
@@ -145,15 +147,14 @@ const AtributosDinamicos = ({
 // COMPONENTE PRINCIPAL: Formulario de Productos con el Hook nuevo
 // =========================================================
 export const ProductoForm = ({
-  initialData,
+  productoId,
   isEdit = false,
-  onCreate,
-  onUpdate,
   onOpenModalNuevaMarca,
+  onSuccessSave,
 }: ProductoFormProps) => {
   const router = useRouter();
 
-  // Consumimos todo desde tu nuevo custom hook
+  // Consumimos todo desde el hook con la nueva lógica interna
   const {
     form,
     onSubmit,
@@ -169,12 +170,11 @@ export const ProductoForm = ({
     handleRemoveVariant,
     handleImageChange,
   } = useProductoForm({
-    initialData,
+    productoId: productoId?.toString(),
     isEdit,
-    onUpdate,
+    onSuccess: onSuccessSave,
   });
 
-  // Si los catálogos se están cargando asíncronamente desde los servicios
   if (isLoading) {
     return (
       <div className="w-full h-60 flex items-center justify-center bg-white rounded-2xl border shadow-sm">
