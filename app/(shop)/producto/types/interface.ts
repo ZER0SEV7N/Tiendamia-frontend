@@ -10,8 +10,8 @@ export interface ProductInfoProps {
   marca: string;
   titulo: string;
   atributos: { nombre: string; opciones: string[] }[];
-  variantesSeleccionadas: Record<string, string>;
-  seleccionarVariante: (atributo: string, opcion: string) => void;
+  atributosSeleccionados: Record<string, string>;
+  seleccionarAtributo: (atributo: string, opcion: string) => void;
   detalles: any;
 }
 

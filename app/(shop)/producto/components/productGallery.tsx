@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { ProductGalleryProps } from "../types/interface";
 
-export function ProductoGallery({ imagenes, titulo, imagenActiva, setImagenActiva, sku }: ProductGalleryProps) {
+export function ProductGallery({ imagenes, titulo, imagenActiva, setImagenActiva, sku }: ProductGalleryProps) {
     return (
         <div className="w-full flex flex-col gap-4">
             <div className="relative w-full aspect-square bg-white border border-gray-200 rounded-md flex items-center justify-center">

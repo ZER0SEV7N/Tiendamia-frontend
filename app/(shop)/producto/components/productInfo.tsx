@@ -2,7 +2,7 @@
 "use client";
 import { ProductInfoProps } from "../types/interface";
 
-export function ProductoInfo({ marca, titulo, atributos, variantesSeleccionadas, seleccionarVariante, detalles }: ProductInfoProps) {
+export function ProductInfo({ marca, titulo, atributos, atributosSeleccionados, seleccionarAtributo, detalles }: ProductInfoProps) {
     return (
         <div className="flex-1 flex flex-col gap-5">
             <div>
@@ -14,15 +14,15 @@ export function ProductoInfo({ marca, titulo, atributos, variantesSeleccionadas,
                 {atributos.map((attr) => (
                     <div key={attr.nombre}>
                         <p className="text-sm text-gray-700 mb-2">
-                            <span className="font-bold">{attr.nombre}:</span> {variantesSeleccionadas[attr.nombre] || "Selecciona una opción"}
+                            <span className="font-bold">{attr.nombre}:</span> {atributosSeleccionados[attr.nombre] || "Selecciona una opción"}
                         </p>
                         <div className="flex flex-wrap gap-2">
                         {attr.opciones.map((opcion) => (
                             <button
                              key={opcion}
-                             onClick={() => seleccionarVariante(attr.nombre, opcion)}
+                             onClick={() => seleccionarAtributo(attr.nombre, opcion)}
                              className={`text-sm px-4 py-2 border rounded-md transition-all ${
-                                 variantesSeleccionadas[attr.nombre] === opcion 
+                                 atributosSeleccionados[attr.nombre] === opcion 
                                  ? "border-black border-2 font-medium bg-gray-50" 
                                  : "border-gray-300 text-gray-600 hover:border-gray-500"
                              }`}
