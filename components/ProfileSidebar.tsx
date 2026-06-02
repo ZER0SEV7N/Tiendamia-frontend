@@ -35,8 +35,8 @@ export default function ProfileSidebar() {
       <nav className="flex flex-col gap-1">
         {menuItems.map((item, index) => {
           const Icon = item.icon;
-          // Verificamos si la URL actual coincide con el botón para activarlo
-          const isActive = pathname === item.href;
+          // Activar también en rutas hijas, por ejemplo /perfil/direcciones/nuevo
+          const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
 
           return (
             <Link
