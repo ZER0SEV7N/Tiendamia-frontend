@@ -1,4 +1,5 @@
 import api from '@/lib/api';
+import { Direccion } from '@/app/(shop)/perfil/types/direccion';
 
 export type UserProfile = {
   id: number;
@@ -8,7 +9,7 @@ export type UserProfile = {
   telefono?: string;
   activo?: boolean;
   rol?: string;
-  direcciones?: any[];
+  direcciones?: Direccion[];
 };
 
 export type OrdenProducto = {
@@ -28,12 +29,12 @@ export type Orden = {
 };
 
 export async function getProfile(): Promise<UserProfile> {
-  const { data } = await api.get('/auth/perfil');
+  const { data } = await api.get('/usuario/me');
   return data as UserProfile;
 }
 
 export async function updateProfile(payload: Partial<UserProfile & { password?: string }>) {
-  const { data } = await api.patch('/auth/perfil', payload);
+  const { data } = await api.patch('/usuario/me', payload);
   return data;
 }
 
