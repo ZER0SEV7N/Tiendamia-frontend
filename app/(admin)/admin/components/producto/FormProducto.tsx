@@ -28,6 +28,7 @@ import {
   FormValues,
 } from "@/app/(admin)/admin/hooks/useProductoForm"; // Ajusta la ruta según tu proyecto
 import { ProductoRequest } from "@/types/producto/productoList";
+import ModalMarca from "@/app/(admin)/admin/components/marca/ModalMarca";
 
 interface ProductoFormProps {
   productoId?: number;
@@ -40,7 +41,7 @@ interface ProductoFormProps {
 }
 
 // =========================================================
-// SUBCOMPONENTE: Atributos Dinámicos por Variante (Mantiene tu diseño)
+// SUBCOMPONENTE: Atributos Dinámicos por Variante
 // =========================================================
 interface AtributosDinamicosProps {
   nestIndex: number;
@@ -144,7 +145,7 @@ const AtributosDinamicos = ({
 };
 
 // =========================================================
-// COMPONENTE PRINCIPAL: Formulario de Productos con el Hook nuevo
+// COMPONENTE PRINCIPAL: Formulario de Productos
 // =========================================================
 export const ProductoForm = ({
   productoId,
@@ -154,7 +155,6 @@ export const ProductoForm = ({
 }: ProductoFormProps) => {
   const router = useRouter();
 
-  // Consumimos todo desde el hook con la nueva lógica interna
   const {
     form,
     onSubmit,
@@ -292,15 +292,10 @@ export const ProductoForm = ({
                           ))}
                         </select>
                       </FormControl>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="h-10 px-3 border-dashed border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900 shrink-0"
-                        onClick={onOpenModalNuevaMarca}
-                        title="Agregar nueva marca"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
+                      <ModalMarca
+                        icons={<Plus className="h-4 w-4" />}
+                        props="h-10 px-3 border-dashed border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900 shrink-0"
+                      />
                     </div>
                     <FormMessage />
                   </FormItem>

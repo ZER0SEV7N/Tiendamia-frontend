@@ -1,6 +1,6 @@
 "use client";
 
-import { ProductoForm } from "@/app/(admin)/admin/components/FormProducto";
+import { ProductoForm } from "@/app/(admin)/admin/components/producto/FormProducto";
 
 function page() {
   return (
