@@ -1,6 +1,6 @@
 "use client";
 
-import { ProtectedRoute } from "@/components/public/ProtectedRoute";
+import { ProtectedRoute } from "@/components/public/layouts/ProtectedRoute";
 import { useCarrito } from "../hook/useCarrito";
 import { useCheckout } from "../hook/useCheckout";
 import { FormularioDireccion } from "../components/checkout/FormularioDireccion";

@@ -9,8 +9,8 @@ import { useAuth } from "@/context/context";
 import { CarritoSkeleton } from "./components/carritoSkeleton";
 
 export default function CarritoPage() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { carritoState, isLoading, error, actualizarCantidad, eliminarItem } = useCarrito(isAuthenticated);
+  const { autenticado, isLoading: authLoading } = useAuth();
+  const { carritoState, isLoading, error, actualizarCantidad, eliminarItem } = useCarrito(autenticado);
   
   if (authLoading || isLoading) return <CarritoSkeleton />;
   if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
@@ -61,7 +61,7 @@ export default function CarritoPage() {
                         </button>
                       </div>
                       <button 
-                        onClick={() => eliminarItem(isAuthenticated ? (item.idDetalle || 0) : item.idVariante)} 
+                        onClick={() => eliminarItem(autenticado ? (item.idDetalle || 0) : item.idVariante)} 
                         className="text-slate-400 hover:text-red-500 transition-colors"
                       >
                         <Trash2 className="w-5 h-5" />
@@ -86,7 +86,7 @@ export default function CarritoPage() {
 
         {/* COLUMNA DERECHA: Resumen */}
         <div className="space-y-6">
-          <ResumenCompra carrito={carritoState} isAuthenticated={isAuthenticated} />
+          <ResumenCompra carrito={carritoState} isAuthenticated={autenticado} />
         </div>
       </div>
     </div>

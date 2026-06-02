@@ -4,14 +4,34 @@ import { ProductosDataTable } from "@/app/(admin)/admin/components/Table/data-ta
 import { useTableProduct } from "../../hooks/useTableProduct";
 import { Button } from "@/components/ui/button"; // Si usas shadcn para los botones de acción
 import { Plus } from "lucide-react"; // Iconos útiles para acompañar los filtros
+import { useRouter } from "next/navigation"; // Para navegación programática al crear un nuevo producto
 import FiltrosInventario from "../../components/Table/FiltrosInventario";
+import { useFilterProducto } from "../../hooks/useFilterProducto";
 
 export default function ProductosPage() {
-  const { tablaColumns, productos } = useTableProduct();
+  const {
+    busqueda,
+    setBusqueda,
+    estado,
+    setEstado,
+    selectedPadre,
+    selectedHija,
+    selectedNieta,
+    opcionesPadre,
+    opcionesHija,
+    opcionesNieta,
+    setProductos,
+    productosFiltrados,
+    handlePadreChange,
+    handleHijaChange,
+    handleNietaChange,
+    handleAplicarFiltros,
+  } = useFilterProducto();
+  const { tablaColumns } = useTableProduct({ setProductos });
+  const router = useRouter();
 
   return (
     <div className="p-6 space-y-6 w-full animate-fade-in">
-      {/* HEADER PRINCIPAL */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
@@ -23,17 +43,33 @@ export default function ProductosPage() {
           </p>
         </div>
 
-        <Button className="bg-[#FF3C3C] hover:bg-[#E03030] text-white font-bold h-10 px-6 rounded-xl transition-colors shadow-sm shadow-red-100">
+        <Button
+          className="bg-[#FF3C3C] hover:bg-[#E03030] text-white font-bold h-10 px-6 rounded-xl transition-colors shadow-sm shadow-red-100"
+          onClick={() => router.push("/admin/productos/crear")}
+        >
           Agregar Producto <Plus className="h-4 w-4 ml-2" />
         </Button>
       </div>
 
-      {/* FILTROS */}
-      <FiltrosInventario />
+      <FiltrosInventario
+        busqueda={busqueda}
+        setBusqueda={setBusqueda}
+        estado={estado}
+        setEstado={setEstado}
+        catPadre={selectedPadre}
+        catHija={selectedHija}
+        catNieta={selectedNieta}
+        categoriasPadre={opcionesPadre}
+        categoriasHija={opcionesHija}
+        categoriasNieta={opcionesNieta}
+        onPadreChange={handlePadreChange}
+        onHijaChange={handleHijaChange}
+        onNietaChange={handleNietaChange}
+        onAplicarFiltros={handleAplicarFiltros}
+      />
 
-      {/* --- BLOQUE DE LA TABLA DATA TABLE --- */}
       <div className="w-full">
-        <ProductosDataTable columns={tablaColumns} data={productos} />
+        <ProductosDataTable columns={tablaColumns} data={productosFiltrados} />
       </div>
     </div>
   );

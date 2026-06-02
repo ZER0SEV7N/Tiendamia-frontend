@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { SiGoogle } from "@icons-pack/react-simple-icons";
 import { Eye, EyeOff } from "lucide-react";
 import { useRegister } from "../hook/useRegister";
+import { GoogleLogin } from "@react-oauth/google";
+import { useRouter } from "next/navigation";
+
 export default function RegisterPage() {
+  const router = useRouter();
   
   const {
     nombres,
@@ -19,6 +22,7 @@ export default function RegisterPage() {
     confirmPassword,
     setConfirmPassword,
     error,
+    setError, 
     cargando,
     handleSubmit,
     loginConGoogle
@@ -41,14 +45,31 @@ export default function RegisterPage() {
       <h1 className="text-center text-lg font-normal text-gray-600 mb-5">Regístrate</h1>
 
       {/* Google */}
-      <button 
-        type="button"
-        // onClick={() => loginConGoogle("token_simulado")} // <-- Conectar aquí
-        className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded py-2 text-sm text-gray-700 hover:bg-gray-50 transition mb-4"
-      >
-        <SiGoogle className="w-4 h-4" />
-        <span>Ingresar con Google</span>
-      </button>
+      <div className="w-full flex justify-center mb-4">
+        <GoogleLogin
+          width="100%"
+          theme="outline"
+          size="large"
+          text="signup_with" 
+          onSuccess={async (credentialResponse) => {
+            try {
+              if (credentialResponse.credential) {
+                await loginConGoogle(credentialResponse.credential);
+                router.push("/");
+              }
+            } catch (err: unknown) {
+              if (err instanceof Error) {
+                setError(err.message);
+              } else {
+                setError("Error al registrarse con Google.");
+              }
+            }
+          }}
+          onError={() => {
+            setError("El registro con Google fue cancelado o falló.");
+          }}
+        />
+      </div>
 
       {/* Divisor */}
       <div className="relative flex items-center mb-4">
@@ -146,7 +167,7 @@ export default function RegisterPage() {
           />
         </div>
 
-        {/* Checkbox ofertas (opcional, visual) */}
+        {/* Checkbox ofertas */}
         <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer pt-1">
           <input type="checkbox" className="rounded" />
           Recibir ofertas de Tiendamia

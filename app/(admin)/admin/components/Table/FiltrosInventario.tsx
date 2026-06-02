@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { SlidersHorizontal, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,15 +10,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Categoria } from "@/types/categoria/categoria";
 
-export default function FiltrosInventario() {
-  // Estados para controlar los inputs
-  const [busqueda, setBusqueda] = useState("");
-  const [catPadre, setCatPadre] = useState("all");
-  const [catHija, setCatHija] = useState("all");
-  const [catNieta, setCatNieta] = useState("all");
-  const [estado, setEstado] = useState("all");
+// Definimos las props que vendrán de tu hook en la vista principal
+interface FiltrosInventarioProps {
+  // Valores actuales de los filtros
+  busqueda: string;
+  catPadre: string;
+  catHija: string;
+  catNieta: string;
+  estado: string;
 
+  // Funciones para actualizar los estados individuales
+  setBusqueda: (value: string) => void;
+  setEstado: (value: string) => void;
+
+  // Data cargada desde el hook/API
+  categoriasPadre: Categoria[];
+  categoriasHija: Categoria[];
+  categoriasNieta: Categoria[];
+
+  // Handlers del hook para disparar las cargas en cascada
+  onPadreChange: (id: string) => void;
+  onHijaChange: (id: string) => void;
+  onNietaChange: (id: string) => void;
+
+  // Acción final
+  onAplicarFiltros: () => void;
+}
+
+export default function FiltrosInventario({
+  busqueda,
+  catPadre,
+  catHija,
+  catNieta,
+  estado,
+  setBusqueda,
+  setEstado,
+  categoriasPadre,
+  categoriasHija,
+  categoriasNieta,
+  onPadreChange,
+  onHijaChange,
+  onNietaChange,
+  onAplicarFiltros,
+}: FiltrosInventarioProps) {
   return (
     <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm w-full space-y-4">
       {/* HEADER DISCRETO */}
@@ -29,7 +64,6 @@ export default function FiltrosInventario() {
       </div>
 
       {/* CONTENEDOR EN UNA SOLA LÍNEA HORIZONTAL */}
-      {/* flex-1 en los hijos asegura que se estiren proporcionalmente para ocupar todo el ancho */}
       <div className="flex flex-col md:flex-row items-stretch md:items-end gap-4 w-full">
         {/* 1. Nombre o ID */}
         <div className="flex flex-col gap-1.5 flex-1 min-w-[180px]">
@@ -53,14 +87,22 @@ export default function FiltrosInventario() {
           <label className="text-xs font-bold text-gray-400 uppercase tracking-wide">
             Cat. Padre
           </label>
-          <Select value={catPadre} onValueChange={setCatPadre}>
+          <Select
+            value={catPadre}
+            onValueChange={(value) => {
+              onPadreChange(value); // El hook se encarga de setear el id y limpiar hijas/nietas
+            }}
+          >
             <SelectTrigger className="h-10 rounded-xl border-gray-200 bg-gray-50/50 focus:ring-[#FF3C3C] w-full">
               <SelectValue placeholder="Todas" />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
               <SelectItem value="all">Todas</SelectItem>
-              <SelectItem value="calzado">Calzado</SelectItem>
-              <SelectItem value="electronica">Electrónica</SelectItem>
+              {categoriasPadre.map((cat) => (
+                <SelectItem key={cat.id} value={String(cat.id)}>
+                  {cat.nombre}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -70,14 +112,23 @@ export default function FiltrosInventario() {
           <label className="text-xs font-bold text-gray-400 uppercase tracking-wide">
             Cat. Hija
           </label>
-          <Select value={catHija} onValueChange={setCatHija}>
-            <SelectTrigger className="h-10 rounded-xl border-gray-200 bg-gray-50/50 focus:ring-[#FF3C3C] w-full">
+          <Select
+            value={catHija}
+            disabled={catPadre === "all"}
+            onValueChange={(value) => {
+              onHijaChange(value); // El hook carga las nietas correspondientes
+            }}
+          >
+            <SelectTrigger className="h-10 rounded-xl border-gray-200 bg-gray-50/50 focus:ring-[#FF3C3C] w-full disabled:bg-gray-100 disabled:cursor-not-allowed">
               <SelectValue placeholder="Todas" />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
               <SelectItem value="all">Todas</SelectItem>
-              <SelectItem value="zapatillas">Zapatillas</SelectItem>
-              <SelectItem value="smartwatches">Smartwatches</SelectItem>
+              {categoriasHija.map((cat) => (
+                <SelectItem key={cat.id} value={String(cat.id)}>
+                  {cat.nombre}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -87,14 +138,21 @@ export default function FiltrosInventario() {
           <label className="text-xs font-bold text-gray-400 uppercase tracking-wide">
             Cat. Nieta
           </label>
-          <Select value={catNieta} onValueChange={setCatNieta}>
-            <SelectTrigger className="h-10 rounded-xl border-gray-200 bg-gray-50/50 focus:ring-[#FF3C3C] w-full">
+          <Select
+            value={catNieta}
+            disabled={catHija === "all" || catPadre === "all"}
+            onValueChange={onNietaChange}
+          >
+            <SelectTrigger className="h-10 rounded-xl border-gray-200 bg-gray-50/50 focus:ring-[#FF3C3C] w-full disabled:bg-gray-100 disabled:cursor-not-allowed">
               <SelectValue placeholder="Todas" />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
               <SelectItem value="all">Todas</SelectItem>
-              <SelectItem value="urbano">Urbano</SelectItem>
-              <SelectItem value="running">Running</SelectItem>
+              {categoriasNieta.map((cat) => (
+                <SelectItem key={cat.id} value={String(cat.id)}>
+                  {cat.nombre}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -117,9 +175,11 @@ export default function FiltrosInventario() {
         </div>
 
         {/* 6. Único Botón de Acción */}
-        {/* md:w-auto asegura que mantenga su proporción ideal sin deformarse en pantallas grandes */}
         <div className="w-full md:w-auto">
-          <Button className="bg-[#FF3C3C] hover:bg-[#E03030] text-white font-bold h-10 px-6 rounded-xl transition-colors shadow-sm shadow-red-100 text-xs uppercase tracking-wider w-full md:w-auto whitespace-nowrap">
+          <Button
+            onClick={onAplicarFiltros}
+            className="bg-[#FF3C3C] hover:bg-[#E03030] text-white font-bold h-10 px-6 rounded-xl transition-colors shadow-sm shadow-red-100 text-xs uppercase tracking-wider w-full md:w-auto whitespace-nowrap cursor-pointer"
+          >
             Aplicar Filtros
           </Button>
         </div>

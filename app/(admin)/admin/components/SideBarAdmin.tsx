@@ -32,7 +32,7 @@ function SideBarAdmin() {
       icon: LayoutDashboard,
     },
     {
-      title: "Producto",
+      title: "Inventario",
       url: "/admin/productos",
       icon: Package,
     },
