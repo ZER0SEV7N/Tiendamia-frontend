@@ -12,8 +12,8 @@ export interface Marca {
 export interface MarcaRequest {
   nombre: string;
   slug: string;
-  imagen_logo?: File | null;
-  imagen_banner?: File | null;
+  imagen_logo?: string | null;
+  imagen_banner?: string | null;
   descripcion: string;
   destacada?: boolean;
   estado?: boolean;

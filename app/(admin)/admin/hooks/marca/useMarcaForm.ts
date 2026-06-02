@@ -1,11 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Marca } from "@/types/marca/marca";
-import { getByIdMarca, createMarca } from "@/services/marca";
+import { getByIdMarca, createMarca, updateMarca } from "@/services/marca";
 import { useEffect, useState } from "react";
 import * as z from "zod";
-import { Resolver, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { upLoadImage } from "@/supabaseCredentials"; // Función para subir imágenes a Supabase Storage
 
 // Validación de imagen para la marca (opcional)
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -58,10 +57,13 @@ export const useMarcaForm = ({
   isEdit,
   onSuccess,
 }: UseMarcaFormProps) => {
-  const [marca, setMarca] = useState<Marca | null>(null);
   const [loading, setLoading] = useState(false);
-  const [urlImagenBanner, setUrlImagenBanner] = useState<string | null>(null);
-  const [urlImagenLogo, setUrlImagenLogo] = useState<string | null>(null);
+  const [urlImagenBannerOriginal, setUrlImagenBannerOriginal] = useState<
+    string | null
+  >(null);
+  const [urlImagenLogoOriginal, setUrlImagenLogoOriginal] = useState<
+    string | null
+  >(null);
 
   // Configuración del formulario con React Hook Form y Zod para validación
   const form = useForm<FormValues>({
@@ -79,27 +81,25 @@ export const useMarcaForm = ({
   // Efecto para cargar los datos de la marca si estamos en modo edición
   useEffect(() => {
     const cargarMarca = async () => {
+      if (!isEdit || !marcaId) return;
+
       setLoading(true);
       try {
-        if (isEdit && marcaId) {
-          const data = await getByIdMarca(Number(marcaId));
-          setMarca(data);
-          // Si la marca tiene imágenes, establecer las URLs para mostrar las vistas previas
-          if (data.imagen_banner) {
-            setUrlImagenBanner(data.imagen_banner);
-          }
-          if (data.imagen_logo) {
-            setUrlImagenLogo(data.imagen_logo);
-          }
-          form.reset({
-            nombre: data.nombre,
-            slug: data.slug,
-            descripcion: data.descripcion,
-            destacada: data.destacada,
-            imagen_banner: urlImagenBanner ? undefined : undefined, // No se carga el archivo, solo se muestra la URL
-            imagen_logo: urlImagenLogo ? undefined : undefined, // No se carga el archivo, solo se muestra la URL
-          });
-        }
+        const data = await getByIdMarca(Number(marcaId));
+
+        // Guardamos las URLs originales en el estado
+        if (data.imagen_banner) setUrlImagenBannerOriginal(data.imagen_banner);
+        if (data.imagen_logo) setUrlImagenLogoOriginal(data.imagen_logo);
+
+        // Seteamos los valores directamente con la data directa del API
+        form.reset({
+          nombre: data.nombre,
+          slug: data.slug,
+          descripcion: data.descripcion,
+          destacada: data.destacada,
+          imagen_banner: undefined, // El input file inicia vacío
+          imagen_logo: undefined, // El input file inicia vacío
+        });
       } catch (error) {
         console.error("Error al cargar la marca:", error);
       } finally {
@@ -107,14 +107,51 @@ export const useMarcaForm = ({
       }
     };
 
-    if (isEdit) {
-      cargarMarca();
-    }
+    cargarMarca();
   }, [marcaId, isEdit]);
 
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
     try {
+      let finalBannerUrl = urlImagenBannerOriginal;
+      let finalLogoUrl = urlImagenLogoOriginal;
+      // Si el usuario subió una nueva imagen, la subimos a Supabase y obtenemos la URL
+      if (data.imagen_banner && data.imagen_banner.length > 0) {
+        const urlSubida = await upLoadImage(
+          data.imagen_banner[0],
+          "marcas",
+          "banner",
+        );
+        if (urlSubida) finalBannerUrl = urlSubida;
+      }
+      // Si el usuario subió una nueva imagen, la subimos a Supabase y obtenemos la URL
+      if (data.imagen_logo && data.imagen_logo.length > 0) {
+        const urlSubida = await upLoadImage(
+          data.imagen_logo[0],
+          "marcas",
+          "logo",
+        );
+        if (urlSubida) finalLogoUrl = urlSubida;
+      }
+      // Construimos el objeto final a enviar al backend
+      const payload = {
+        nombre: data.nombre,
+        slug: data.slug,
+        descripcion: data.descripcion,
+        destacada: !!data.destacada,
+        imagen_banner: finalBannerUrl,
+        imagen_logo: finalLogoUrl,
+      };
+      // Lógica para crear o actualizar según el modo
+      if (isEdit && marcaId) {
+        await updateMarca(Number(marcaId), payload);
+        alert("¡Marca actualizada con éxito!");
+      } else {
+        await createMarca(payload);
+        alert("¡Marca creada con éxito!");
+      }
+      // Llamamos al callback de éxito para cerrar el modal o refrescar la lista
+      if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error al guardar la marca:", error);
     } finally {
@@ -122,5 +159,5 @@ export const useMarcaForm = ({
     }
   };
 
-  return { form };
+  return { form, onSubmit, loading };
 };

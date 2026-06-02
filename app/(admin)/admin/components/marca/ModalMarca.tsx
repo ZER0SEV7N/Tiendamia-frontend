@@ -34,13 +34,17 @@ function ModalMarca({
   marcaId,
   onSuccess,
 }: ModalMarcaProps) {
-  const { form } = useMarcaForm({ marcaId, isEdit, onSuccess });
+  const { form, onSubmit } = useMarcaForm({
+    marcaId,
+    isEdit,
+    onSuccess,
+  });
 
   return (
     <Dialog>
       <DialogTrigger className={props}>{icons}</DialogTrigger>
       {/* sm:max-w-[600px] le da un ancho más cómodo para dos columnas */}
-      <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-150 p-0 overflow-hidden">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>{isEdit ? "Editar Marca" : "Crear Marca"}</DialogTitle>
           <DialogDescription>
@@ -52,9 +56,7 @@ function ModalMarca({
 
         {/* Conectado al handleSubmit real de react-hook-form */}
         <form
-          onSubmit={form.handleSubmit(
-            form.control._options.defaultValues ? () => {} : () => {},
-          )}
+          onSubmit={form.handleSubmit(onSubmit)}
           className="p-6 flex flex-col gap-5 bg-white dark:bg-zinc-950"
         >
           <FormProvider {...form}>
