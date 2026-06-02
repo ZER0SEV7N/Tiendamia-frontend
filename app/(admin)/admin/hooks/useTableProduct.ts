@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { columns } from "../components/Table/columns";
+import { columns } from "../components/table/columns";
 import { cambiarEstado } from "@/services/producto";
 import { ProductoList } from "@/types/producto/productoList";
 

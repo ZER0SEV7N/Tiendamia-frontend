@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { ProductoForm } from "@/app/(admin)/admin/components/FormProducto";
+import { ProductoForm } from "@/app/(admin)/admin/components/producto/FormProducto";
 
 export default function EditarProductoPage() {
   const params = useParams();
