@@ -1,12 +1,12 @@
 "use client";
 
-import { ProductosDataTable } from "@/app/(admin)/admin/components/table/data-table";
-import { useTableProduct } from "../../hooks/useTableProduct";
+import { useTableProduct } from "@/app/(admin)/admin/hooks/producto/useTableProduct";
 import { Button } from "@/components/ui/button"; // Si usas shadcn para los botones de acción
 import { Plus } from "lucide-react"; // Iconos útiles para acompañar los filtros
-import { useRouter } from "next/navigation"; // Para navegación programática al crear un nuevo producto
-import FiltrosInventario from "../../components/table/FiltrosInventario";
-import { useFilterProducto } from "../../hooks/useFilterProducto";
+import { useRouter } from "next/navigation"; // Para navegación programática al crear un nuevo producto // Componente de filtros personalizado
+import { useFilterProducto } from "../../hooks/producto/useFilterProducto";
+import FiltrosInventario from "../../components/Table/FiltrosInventario";
+import { ProductosDataTable } from "../../components/Table/data-table";
 
 export default function ProductosPage() {
   const {

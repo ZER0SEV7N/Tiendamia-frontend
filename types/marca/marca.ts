@@ -8,3 +8,13 @@ export interface Marca {
   imagen_logo: string;
   createAt: string;
 }
+
+export interface MarcaRequest {
+  nombre: string;
+  slug: string;
+  imagen_logo?: File | null;
+  imagen_banner?: File | null;
+  descripcion: string;
+  destacada?: boolean;
+  estado?: boolean;
+}

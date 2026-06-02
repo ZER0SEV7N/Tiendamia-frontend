@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
-import { columns } from "../components/table/columns";
 import { cambiarEstado } from "@/services/producto";
 import { ProductoList } from "@/types/producto/productoList";
+import { columns } from "../../components/Table/columns";
 
 interface UseTableProductProps {
   setProductos: React.Dispatch<React.SetStateAction<ProductoList[]>>;

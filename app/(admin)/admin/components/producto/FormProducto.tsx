@@ -26,7 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   useProductoForm,
   FormValues,
-} from "@/app/(admin)/admin/hooks/useProductoForm"; // Ajusta la ruta según tu proyecto
+} from "@/app/(admin)/admin/hooks/producto/useProductoForm"; // Ajusta la ruta según tu proyecto
 import { ProductoRequest } from "@/types/producto/productoList";
 import ModalMarca from "@/app/(admin)/admin/components/marca/ModalMarca";
 
@@ -150,7 +150,6 @@ const AtributosDinamicos = ({
 export const ProductoForm = ({
   productoId,
   isEdit = false,
-  onOpenModalNuevaMarca,
   onSuccessSave,
 }: ProductoFormProps) => {
   const router = useRouter();
@@ -294,6 +293,7 @@ export const ProductoForm = ({
                       </FormControl>
                       <ModalMarca
                         icons={<Plus className="h-4 w-4" />}
+                        isEdit={false}
                         props="h-10 px-3 border-dashed border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900 shrink-0"
                       />
                     </div>
