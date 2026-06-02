@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
+import { getProfile, updateProfile } from "@/lib/user";
 
 interface FormularioProps {
   onRegresar: () => void;
@@ -17,30 +17,83 @@ export default function FormularioEditarView({ onRegresar }: FormularioProps) {
     correo: "",
     telefono: "",
     cambiarPassword: false,
+    password: "",
   });
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    import('@/lib/user').then(({ getProfile }) => {
-      getProfile().then((u) => {
-        setFormData((s) => ({ ...s, nombres: u.nombres || '', apellidos: u.apellidos || '', correo: u.correo || '', telefono: u.telefono || '' }));
-      }).catch(() => {
+    getProfile()
+      .then((u) => {
+        setFormData((s) => ({
+          ...s,
+          nombres: u.nombres || "",
+          apellidos: u.apellidos || "",
+          correo: u.correo || "",
+          telefono: u.telefono || "",
+        }));
+      })
+      .catch(() => {
         // no action on failure here
-      });
-    });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Si el usuario pide cambiar contraseña, pedimos la nueva
-    const payload: any = { nombres: formData.nombres, apellidos: formData.apellidos, telefono: formData.telefono };
-    if (formData.cambiarPassword) {
-      const nueva = window.prompt('Introduce la nueva contraseña:');
-      if (nueva) payload.password = nueva;
+  const handleSavePassword = () => {
+    if (!newPassword || !confirmPassword) {
+      setPasswordError("Completa ambos campos para actualizar la contraseña.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Las contraseñas no coinciden.");
+      return;
     }
 
-    import('@/lib/user').then(({ updateProfile }) => {
-      updateProfile(payload).then(() => onRegresar());
+    setFormData({
+      ...formData,
+      cambiarPassword: true,
+      password: newPassword,
     });
+    setPasswordModalOpen(false);
+    setPasswordError(null);
+    setNewPassword("");
+    setConfirmPassword("");
+  };
+
+  const handleCancelPassword = () => {
+    setPasswordModalOpen(false);
+    setPasswordError(null);
+    setNewPassword("");
+    setConfirmPassword("");
+    if (!formData.password) {
+      setFormData({ ...formData, cambiarPassword: false });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const payload: any = {
+      nombres: formData.nombres,
+      apellidos: formData.apellidos,
+      telefono: formData.telefono,
+    };
+    if (formData.cambiarPassword && formData.password) {
+      payload.password = formData.password;
+    }
+
+    setSaving(true);
+    try {
+      await updateProfile(payload);
+      onRegresar();
+    } catch (error) {
+      console.error("Error guardando perfil:", error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -106,35 +159,92 @@ export default function FormularioEditarView({ onRegresar }: FormularioProps) {
           </p>
         </div>
 
-        {/* Checkbox */}
-        <div className="flex items-center space-x-3 pt-2">
-          <Checkbox
-            id="cambiarPassword"
-            checked={formData.cambiarPassword}
-            onCheckedChange={(checked) =>
-              setFormData({ ...formData, cambiarPassword: !!checked })
-            }
-            className="w-5 h-5 border-neutral-400 data-[state=checked]:bg-neutral-800 data-[state=checked]:border-neutral-800"
-          />
-          <label
-            htmlFor="cambiarPassword"
-            className="text-[15px] font-medium text-neutral-700 cursor-pointer select-none"
-          >
-            Cambiar contraseña de la cuenta
-          </label>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-neutral-700">Contraseña</p>
+              <p className="text-sm text-neutral-500">
+                {formData.cambiarPassword ? "Se actualizará al guardar." : "No se modificará si no abres la ventana."}
+              </p>
+            </div>
+            <Button
+              type="button"
+              onClick={() => setPasswordModalOpen(true)}
+              className="bg-[#FF3C3C] hover:bg-red-600 text-white font-bold px-4 h-11 rounded-md text-sm transition-colors"
+            >
+              Cambiar contraseña
+            </Button>
+          </div>
+          {formData.cambiarPassword && (
+            <p className="text-sm text-emerald-700">Nueva contraseña lista para guardar.</p>
+          )}
         </div>
 
-        {/* Botón de Envió */}
         <div className="pt-4">
           <Button
             type="submit"
             className="bg-[#FF3C3C] hover:bg-red-600 text-white font-bold px-8 h-12 rounded-md text-base transition-colors shadow-sm"
+            disabled={saving}
           >
-            Guardar cambios
+            {saving ? "Guardando cambios..." : "Guardar cambios"}
           </Button>
         </div>
-
       </form>
+
+      {passwordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-semibold text-neutral-900">Actualizar contraseña</h2>
+                <p className="text-sm text-neutral-500">Ingresa una contraseña nueva y confírmala.</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCancelPassword}
+                className="text-sm font-semibold text-neutral-600 hover:text-neutral-950"
+              >
+                Cerrar
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-neutral-700">Nueva contraseña</label>
+                <Input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Ingrese nueva contraseña"
+                  className="h-12 border-neutral-300 focus-visible:ring-neutral-400 bg-white rounded-md text-neutral-800"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-neutral-700">Confirmar contraseña</label>
+                <Input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Repite la contraseña"
+                  className="h-12 border-neutral-300 focus-visible:ring-neutral-400 bg-white rounded-md text-neutral-800"
+                />
+              </div>
+              {passwordError && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  {passwordError}
+                </div>
+              )}
+              <div className="flex justify-end gap-3 pt-2">
+                <Button type="button" onClick={handleCancelPassword} className="bg-gray-100 text-gray-800 hover:bg-gray-200">
+                  Cancelar
+                </Button>
+                <Button type="button" onClick={handleSavePassword} className="bg-[#FF3C3C] hover:bg-red-600 text-white">
+                  Guardar contraseña
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
