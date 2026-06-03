@@ -7,7 +7,7 @@ export const getMarcas = async () => {
 };
 
 export const getByIdMarca = async (id: number) => {
-  const response = await api.get(`/admin/marca/${id}/`);
+  const response = await api.get(`/admin/marca/${id}`);
   return response.data;
 };
 
@@ -17,6 +17,6 @@ export const createMarca = async (data: MarcaRequest) => {
 };
 
 export const updateMarca = async (id: number, data: MarcaRequest) => {
-  const response = await api.put(`/admin/marca/${id}/`, data);
+  const response = await api.put(`/admin/marca/${id}`, data);
   return response.data;
 };

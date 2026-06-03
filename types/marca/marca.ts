@@ -4,6 +4,7 @@ export interface Marca {
   slug: string;
   descripcion: string;
   destacada: boolean;
+  estado: boolean;
   imagen_banner: string;
   imagen_logo: string;
   createAt: string;

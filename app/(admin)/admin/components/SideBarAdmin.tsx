@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, LayoutDashboard, Package, User } from "lucide-react";
+import { LogOut, LayoutDashboard, Package, User, Dices } from "lucide-react";
 import { useAuth } from "@/context/context";
 
 function SideBarAdmin() {
@@ -35,6 +35,11 @@ function SideBarAdmin() {
       title: "Inventario",
       url: "/admin/productos",
       icon: Package,
+    },
+    {
+      title: "Marcas",
+      url: "/admin/marcas",
+      icon: Dices,
     },
   ];
 

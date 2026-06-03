@@ -6,7 +6,7 @@ import { Plus } from "lucide-react"; // Iconos útiles para acompañar los filtr
 import { useRouter } from "next/navigation"; // Para navegación programática al crear un nuevo producto // Componente de filtros personalizado
 import { useFilterProducto } from "../../hooks/producto/useFilterProducto";
 import FiltrosInventario from "../../components/table/FiltrosInventario";
-import { ProductosDataTable } from "../../components/table/data-table";
+import { DataTable } from "../../components/table/data-table";
 
 export default function ProductosPage() {
   const {
@@ -69,7 +69,7 @@ export default function ProductosPage() {
       />
 
       <div className="w-full">
-        <ProductosDataTable columns={tablaColumns} data={productosFiltrados} />
+        <DataTable columns={tablaColumns} data={productosFiltrados} />
       </div>
     </div>
   );
