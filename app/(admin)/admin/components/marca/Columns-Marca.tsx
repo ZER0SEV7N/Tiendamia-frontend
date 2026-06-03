@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Marca } from "@/types/marca/marca";
 import ModalMarca from "./ModalMarca";
+import ModalDetalleMarca from "./ModalDetalleMarca";
 
 export const ColumnsMarca = (
   onDelete: (id: number) => void,
@@ -73,14 +74,7 @@ export const ColumnsMarca = (
     header: "ACCIONES",
     cell: ({ row }) => (
       <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onViewDetails && onViewDetails(row.original.id)}
-          className="h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
-        >
-          <Eye className="h-4 w-4" />
-        </Button>
+        <ModalDetalleMarca marca={row.original} />
 
         <ModalMarca
           isEdit={true}
