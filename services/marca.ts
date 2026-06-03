@@ -17,6 +17,6 @@ export const createMarca = async (data: MarcaRequest) => {
 };
 
 export const updateMarca = async (id: number, data: MarcaRequest) => {
-  const response = await api.put(`/admin/marca/${id}`, data);
+  const response = await api.put(`/admin/marca/update/${id}`, data);
   return response.data;
 };

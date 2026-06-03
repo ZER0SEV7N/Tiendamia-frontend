@@ -16,16 +16,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { FormProvider } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useMarcaForm } from "../../hooks/marca/useMarcaForm";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useMarcaForm } from "../../hooks/marca/useMarcaForm";
+import { Marca } from "@/types/marca/marca";
 
 interface ModalMarcaProps {
   icons: React.ReactNode;
   props?: string;
   marcaId?: string;
   isEdit: boolean;
-  onSuccess?: () => void;
+  onSuccessData?: (data: Partial<Marca>) => void;
 }
 
 function ModalMarca({
@@ -33,7 +34,7 @@ function ModalMarca({
   props,
   isEdit = false,
   marcaId,
-  onSuccess,
+  onSuccessData,
 }: ModalMarcaProps) {
   const {
     form,
@@ -45,7 +46,7 @@ function ModalMarca({
   } = useMarcaForm({
     marcaId,
     isEdit,
-    onSuccess,
+    onSuccessData,
   });
 
   return (
@@ -132,7 +133,7 @@ function ModalMarca({
                 />
               </div>
 
-              {/* Imagen Banner con Miniatura Flotante */}
+              {/* Imagen Banner */}
               <FormField
                 control={form.control}
                 name="imagen_banner"
@@ -150,7 +151,6 @@ function ModalMarca({
                           onChange={(e) => field.onChange(e.target.files)}
                         />
                       </FormControl>
-
                       {isEdit && urlImagenBannerOriginal && (
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-10 bg-zinc-100 rounded border overflow-hidden flex items-center justify-center shadow-sm pointer-events-none">
                           <Image
@@ -159,6 +159,7 @@ function ModalMarca({
                             width={32}
                             height={32}
                             className="h-full w-full object-cover"
+                            unoptimized
                           />
                         </div>
                       )}
@@ -168,7 +169,7 @@ function ModalMarca({
                 )}
               />
 
-              {/* Imagen Logo con Miniatura Flotante */}
+              {/* Imagen Logo */}
               <FormField
                 control={form.control}
                 name="imagen_logo"
@@ -186,7 +187,6 @@ function ModalMarca({
                           onChange={(e) => field.onChange(e.target.files)}
                         />
                       </FormControl>
-
                       {isEdit && urlImagenLogoOriginal && (
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-10 bg-zinc-100 rounded border overflow-hidden flex items-center justify-center shadow-sm pointer-events-none">
                           <Image
@@ -195,6 +195,7 @@ function ModalMarca({
                             width={32}
                             height={32}
                             className="h-full w-full object-cover"
+                            unoptimized
                           />
                         </div>
                       )}
@@ -227,7 +228,6 @@ function ModalMarca({
               </div>
             </div>
 
-            {/* Botón de acción */}
             <div className="flex justify-end mt-2">
               <Button
                 type="submit"

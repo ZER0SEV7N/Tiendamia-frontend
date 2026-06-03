@@ -6,13 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import ModalMarca from "./ModalMarca";
 import { Marca } from "@/types/marca/marca";
+import ModalMarca from "./ModalMarca";
 
 export const ColumnsMarca = (
   onDelete: (id: number) => void,
   onStatusChange: (id: number, nuevoEstado: boolean) => void,
-  onViewDetails?: (id: number) => void, // Añadido para ver detalle
+  onUpdateMarca: (id: number, datosActualizados: Partial<Marca>) => void,
+  onViewDetails?: (id: number) => void,
 ): ColumnDef<Marca>[] => [
   {
     accessorKey: "imagen_logo",
@@ -24,6 +25,7 @@ export const ColumnsMarca = (
           alt={row.original.nombre}
           fill
           className="object-cover"
+          unoptimized
         />
       </div>
     ),
@@ -71,7 +73,6 @@ export const ColumnsMarca = (
     header: "ACCIONES",
     cell: ({ row }) => (
       <div className="flex items-center gap-1">
-        {/* Ver Detalle */}
         <Button
           variant="ghost"
           size="icon"
@@ -81,14 +82,15 @@ export const ColumnsMarca = (
           <Eye className="h-4 w-4" />
         </Button>
 
-        {/* Editar */}
         <ModalMarca
           isEdit={true}
-          icons={<Edit2 className="h-4 w-4" />}
           marcaId={row.original.id.toString()}
+          icons={<Edit2 className="h-4 w-4" />}
+          onSuccessData={(updatedFields) =>
+            onUpdateMarca(row.original.id, updatedFields)
+          }
         />
 
-        {/* Eliminar */}
         <Button
           variant="ghost"
           size="icon"

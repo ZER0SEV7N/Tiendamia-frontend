@@ -8,25 +8,45 @@ interface UseTableMarcaProps {
 export const useTableMarca = ({ setMarcas }: UseTableMarcaProps) => {
   const handleDelete = (id: number) => {
     console.log("Abriendo modal de confirmación para eliminar ID:", id);
-    // Aquí podrías abrir un modal de confirmación para eliminar la marca
   };
 
   const handleStatusChange = async (id: number, nuevoEstado: boolean) => {
     try {
-      // Aquí podrías hacer una llamada a la API para cambiar el estado de la marca
       setMarcas((prevMarcas) =>
         prevMarcas.map((m) =>
-          m.id === id ? { ...m, destacada: nuevoEstado } : m,
+          m.id === id ? { ...m, estado: nuevoEstado } : m,
         ),
       );
-      // Después de actualizar el estado, podrías refrescar la lista de marcas o actualizar el estado local
     } catch (error) {
       console.error("Error al actualizar el estado en el servidor:", error);
       alert("No se pudo cambiar el estado de la marca.");
     }
   };
 
-  const tablaColumns = ColumnsMarca(handleDelete, handleStatusChange);
+  const handleUpdateMarca = (id: number, datosActualizados: Partial<Marca>) => {
+    setMarcas((prevMarcas) =>
+      prevMarcas.map((m) =>
+        m.id === id
+          ? {
+              ...m,
+              ...datosActualizados,
+              imagen_logo: datosActualizados.imagen_logo
+                ? `${datosActualizados.imagen_logo.split("?")[0]}?t=${Date.now()}`
+                : m.imagen_logo,
+              imagen_banner: datosActualizados.imagen_banner
+                ? `${datosActualizados.imagen_banner.split("?")[0]}?t=${Date.now()}`
+                : m.imagen_banner,
+            }
+          : m,
+      ),
+    );
+  };
+
+  const tablaColumns = ColumnsMarca(
+    handleDelete,
+    handleStatusChange,
+    handleUpdateMarca,
+  );
 
   return { tablaColumns };
 };

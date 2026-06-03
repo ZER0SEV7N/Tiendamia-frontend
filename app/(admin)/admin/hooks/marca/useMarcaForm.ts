@@ -6,6 +6,7 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { upLoadImage } from "@/supabaseCredentials"; // Función para subir imágenes a Supabase Storage
+import { Marca } from "@/types/marca/marca";
 
 // Validación de imagen para la marca (opcional)
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -47,16 +48,17 @@ const formSchema = z.object({
 
 export type FormValues = z.infer<typeof formSchema>;
 
+// 🔥 MODIFICADO: Ahora tipamos onSuccessData para pasar el Payload modificado a la tabla
 interface UseMarcaFormProps {
   marcaId?: string;
   isEdit: boolean;
-  onSuccess?: () => void;
+  onSuccessData?: (data: Partial<Marca>) => void;
 }
 
 export const useMarcaForm = ({
   marcaId,
   isEdit,
-  onSuccess,
+  onSuccessData,
 }: UseMarcaFormProps) => {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -135,6 +137,7 @@ export const useMarcaForm = ({
     try {
       let finalBannerUrl = urlImagenBannerOriginal;
       let finalLogoUrl = urlImagenLogoOriginal;
+
       // Subida condicionada de Banner
       if (data.imagen_banner && data.imagen_banner.length > 0) {
         const urlSubida = await upLoadImage(
@@ -144,6 +147,7 @@ export const useMarcaForm = ({
         );
         if (urlSubida) finalBannerUrl = urlSubida;
       }
+
       // Subida condicionada de Logo
       if (data.imagen_logo && data.imagen_logo.length > 0) {
         const urlSubida = await upLoadImage(
@@ -153,13 +157,14 @@ export const useMarcaForm = ({
         );
         if (urlSubida) finalLogoUrl = urlSubida;
       }
+
       // Payload limpio para prevenir el Error 500 del Servidor
       const payload = {
         nombre: data.nombre,
         slug: data.slug,
         descripcion: data.descripcion || "",
         destacada: !!data.destacada,
-        imagen_banner: finalBannerUrl || "", // Reemplaza null por string vacío si tu BD es estricta
+        imagen_banner: finalBannerUrl || "",
         imagen_logo: finalLogoUrl || "",
       };
 
@@ -172,7 +177,9 @@ export const useMarcaForm = ({
       }
 
       setIsModalOpen(false); // Cierre exitoso controlado aquí
-      if (onSuccess) onSuccess();
+
+      // 🔥 MODIFICADO: Enviamos el payload hacia el componente que maneja la tabla
+      if (onSuccessData) onSuccessData(payload);
     } catch (error) {
       console.error("Error al guardar la marca:", error);
     } finally {
