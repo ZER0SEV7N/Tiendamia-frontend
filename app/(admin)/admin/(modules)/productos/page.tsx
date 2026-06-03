@@ -1,12 +1,12 @@
 "use client";
 
-import { ProductosDataTable } from "@/app/(admin)/admin/components/table/data-table";
-import { useTableProduct } from "../../hooks/useTableProduct";
+import { useTableProduct } from "@/app/(admin)/admin/hooks/producto/useTableProduct";
 import { Button } from "@/components/ui/button"; // Si usas shadcn para los botones de acción
 import { Plus } from "lucide-react"; // Iconos útiles para acompañar los filtros
-import { useRouter } from "next/navigation"; // Para navegación programática al crear un nuevo producto
-import FiltrosInventario from "../../components/table/FiltrosInventario";
-import { useFilterProducto } from "../../hooks/useFilterProducto";
+import { useRouter } from "next/navigation"; // Para navegación programática al crear un nuevo producto // Componente de filtros personalizado
+import { useFilterProducto } from "../../hooks/producto/useFilterProducto";
+import FiltrosInventario from "../../components/Table/FiltrosInventario";
+import { DataTable } from "../../components/Table/data-table";
 
 export default function ProductosPage() {
   const {
@@ -47,7 +47,7 @@ export default function ProductosPage() {
           className="bg-[#FF3C3C] hover:bg-[#E03030] text-white font-bold h-10 px-6 rounded-xl transition-colors shadow-sm shadow-red-100"
           onClick={() => router.push("/admin/productos/crear")}
         >
-          Agregar Producto <Plus className="h-4 w-4 ml-2" />
+          Agregar Producto <Plus className="h-4 w-4 ml-2" /> 
         </Button>
       </div>
 
@@ -69,7 +69,7 @@ export default function ProductosPage() {
       />
 
       <div className="w-full">
-        <ProductosDataTable columns={tablaColumns} data={productosFiltrados} />
+        <DataTable columns={tablaColumns} data={productosFiltrados} />
       </div>
     </div>
   );

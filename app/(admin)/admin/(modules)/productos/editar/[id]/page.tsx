@@ -14,7 +14,6 @@ export default function EditarProductoPage() {
         isEdit={true}
         productoId={Number(id)}
         onSuccessSave={() => router.push("/admin/productos")}
-        onOpenModalNuevaMarca={() => console.log("Abrir modal de marcas")}
       />
     </div>
   );

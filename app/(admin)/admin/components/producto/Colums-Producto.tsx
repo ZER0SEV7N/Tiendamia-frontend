@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
-// Estructura exacta de tu ProductoList de Java
+// Definimos la interfaz para los datos de producto que se mostrarán en la tabla
 export interface ProductoList {
   id: number;
   nombre: string;
@@ -19,7 +19,7 @@ export interface ProductoList {
   estado: boolean;
 }
 
-export const columns = (
+export const ColumnsProducto = (
   onEdit: (id: number) => void,
   onDelete: (id: number) => void,
   onStatusChange: (id: number, nuevoEstado: boolean) => void,
@@ -96,7 +96,11 @@ export const columns = (
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onEdit(row.original.id)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onEdit(row.original.id);
+          }}
           className="h-8 w-8 text-gray-500 hover:text-gray-900 hover:bg-gray-100"
         >
           <Edit2 className="h-4 w-4" />

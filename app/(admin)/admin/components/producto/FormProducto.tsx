@@ -26,7 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   useProductoForm,
   FormValues,
-} from "@/app/(admin)/admin/hooks/useProductoForm"; // Ajusta la ruta según tu proyecto
+} from "@/app/(admin)/admin/hooks/producto/useProductoForm"; // Ajusta la ruta según tu proyecto
 import { ProductoRequest } from "@/types/producto/productoList";
 import ModalMarca from "@/app/(admin)/admin/components/marca/ModalMarca";
 
@@ -36,7 +36,6 @@ interface ProductoFormProps {
   isEdit?: boolean;
   onCreate?: (data: ProductoRequest) => void | Promise<string>;
   onUpdate?: (data: ProductoRequest) => void | Promise<string>;
-  onOpenModalNuevaMarca?: () => void;
   onSuccessSave?: () => void;
 }
 
@@ -131,7 +130,7 @@ const AtributosDinamicos = ({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-50 mb-[2px]"
+                className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-50 mb-0.5"
                 onClick={() => remove(kIndex)}
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -150,7 +149,6 @@ const AtributosDinamicos = ({
 export const ProductoForm = ({
   productoId,
   isEdit = false,
-  onOpenModalNuevaMarca,
   onSuccessSave,
 }: ProductoFormProps) => {
   const router = useRouter();
@@ -160,6 +158,7 @@ export const ProductoForm = ({
     onSubmit,
     isLoading,
     marcas,
+    cargarMarcas,
     opcionesPadre,
     opcionesHija,
     opcionesNieta,
@@ -216,7 +215,7 @@ export const ProductoForm = ({
                 </h2>
               </div>
 
-              <p className="text-sm text-muted-foreground mt-2 pl-[3.25rem] hidden sm:block">
+              <p className="text-sm text-muted-foreground mt-2 pl-13 hidden sm:block">
                 Gestiona la información base del catálogo y controla el
                 inventario de sus variantes.
               </p>
@@ -294,7 +293,9 @@ export const ProductoForm = ({
                       </FormControl>
                       <ModalMarca
                         icons={<Plus className="h-4 w-4" />}
+                        isEdit={false}
                         props="h-10 px-3 border-dashed border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900 shrink-0"
+                        onSuccess={cargarMarcas}
                       />
                     </div>
                     <FormMessage />

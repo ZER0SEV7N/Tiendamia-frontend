@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
-import { columns } from "../components/table/columns";
 import { cambiarEstado } from "@/services/producto";
 import { ProductoList } from "@/types/producto/productoList";
+import { ColumnsProducto } from "../../components/producto/Colums-Producto";
 
 interface UseTableProductProps {
   setProductos: React.Dispatch<React.SetStateAction<ProductoList[]>>;
@@ -34,7 +34,11 @@ export const useTableProduct = ({ setProductos }: UseTableProductProps) => {
     }
   };
 
-  const tablaColumns = columns(handleEdit, handleDelete, handleStatusChange);
+  const tablaColumns = ColumnsProducto(
+    handleEdit,
+    handleDelete,
+    handleStatusChange,
+  );
 
   return { tablaColumns };
 };
