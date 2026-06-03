@@ -18,6 +18,7 @@ import { FormProvider } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useMarcaForm } from "../../hooks/marca/useMarcaForm";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 interface ModalMarcaProps {
   icons: React.ReactNode;
@@ -34,7 +35,14 @@ function ModalMarca({
   marcaId,
   onSuccess,
 }: ModalMarcaProps) {
-  const { form, handleSubmit, isModalOpen, setIsModalOpen } = useMarcaForm({
+  const {
+    form,
+    handleSubmit,
+    isModalOpen,
+    setIsModalOpen,
+    urlImagenBannerOriginal,
+    urlImagenLogoOriginal,
+  } = useMarcaForm({
     marcaId,
     isEdit,
     onSuccess,
@@ -43,7 +51,6 @@ function ModalMarca({
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
       <DialogTrigger className={props}>{icons}</DialogTrigger>
-      {/* sm:max-w-[600px] le da un ancho más cómodo para dos columnas */}
       <DialogContent className="sm:max-w-150 p-0 overflow-hidden">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>{isEdit ? "Editar Marca" : "Crear Marca"}</DialogTitle>
@@ -54,15 +61,13 @@ function ModalMarca({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Conectado al handleSubmit real de react-hook-form */}
         <form
           onSubmit={handleSubmit}
           className="p-6 flex flex-col gap-5 bg-white dark:bg-zinc-950"
         >
           <FormProvider {...form}>
-            {/* Grilla principal: 1 columna en móvil, 2 columnas desde 'md' */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-              {/* Nombre - Ocupa todo el ancho en móviles y su columna en desktop */}
+              {/* Nombre */}
               <FormField
                 control={form.control}
                 name="nombre"
@@ -104,7 +109,7 @@ function ModalMarca({
                 )}
               />
 
-              {/* Descripción - Forzado a ocupar las 2 columnas completo en desktop */}
+              {/* Descripción */}
               <div className="md:col-span-2 w-full">
                 <FormField
                   control={form.control}
@@ -127,7 +132,7 @@ function ModalMarca({
                 />
               </div>
 
-              {/* Imagen Banner */}
+              {/* Imagen Banner con Miniatura Flotante */}
               <FormField
                 control={form.control}
                 name="imagen_banner"
@@ -136,20 +141,34 @@ function ModalMarca({
                     <FormLabel className="text-xs font-semibold">
                       Imagen Banner (opcional)
                     </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.webp"
-                        className="w-full cursor-pointer"
-                        onChange={(e) => field.onChange(e.target.files)}
-                      />
-                    </FormControl>
+                    <div className="relative flex items-center">
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          className="w-full cursor-pointer pr-16"
+                          onChange={(e) => field.onChange(e.target.files)}
+                        />
+                      </FormControl>
+
+                      {isEdit && urlImagenBannerOriginal && (
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-10 bg-zinc-100 rounded border overflow-hidden flex items-center justify-center shadow-sm pointer-events-none">
+                          <Image
+                            src={urlImagenBannerOriginal}
+                            alt="Banner actual"
+                            width={32}
+                            height={32}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Imagen Logo */}
+              {/* Imagen Logo con Miniatura Flotante */}
               <FormField
                 control={form.control}
                 name="imagen_logo"
@@ -158,20 +177,34 @@ function ModalMarca({
                     <FormLabel className="text-xs font-semibold">
                       Imagen Logo (opcional)
                     </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.webp"
-                        className="w-full cursor-pointer"
-                        onChange={(e) => field.onChange(e.target.files)}
-                      />
-                    </FormControl>
+                    <div className="relative flex items-center">
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          className="w-full cursor-pointer pr-16"
+                          onChange={(e) => field.onChange(e.target.files)}
+                        />
+                      </FormControl>
+
+                      {isEdit && urlImagenLogoOriginal && (
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-10 bg-zinc-100 rounded border overflow-hidden flex items-center justify-center shadow-sm pointer-events-none">
+                          <Image
+                            src={urlImagenLogoOriginal}
+                            alt="Logo actual"
+                            width={32}
+                            height={32}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Checkbox Destacada - Alineado abajo en su fila */}
+              {/* Checkbox Destacada */}
               <div className="md:col-span-2 flex items-center pt-2">
                 <FormField
                   control={form.control}

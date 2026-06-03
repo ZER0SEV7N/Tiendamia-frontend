@@ -8,7 +8,7 @@ export const getMarcas = async () => {
 
 export const getByIdMarca = async (id: number) => {
   const response = await api.get(`/admin/marca/${id}`);
-  return response.data;
+  return response.data.data;
 };
 
 export const createMarca = async (data: MarcaRequest) => {

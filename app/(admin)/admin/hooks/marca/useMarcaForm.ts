@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { getByIdMarca, createMarca, updateMarca } from "@/services/marca";
 import { useEffect, useState } from "react";
@@ -82,25 +83,27 @@ export const useMarcaForm = ({
   // Efecto para cargar los datos de la marca si estamos en modo edición
   useEffect(() => {
     const cargarMarca = async () => {
-      if (!isEdit || !marcaId) return;
+      if (!isModalOpen || !isEdit || !marcaId) return;
 
       setLoading(true);
       try {
         const data = await getByIdMarca(Number(marcaId));
 
         // Guardamos las URLs originales en el estado
-        if (data.imagen_banner) setUrlImagenBannerOriginal(data.imagen_banner);
-        if (data.imagen_logo) setUrlImagenLogoOriginal(data.imagen_logo);
-
-        // Seteamos los valores directamente con la data directa del API
-        form.reset({
-          nombre: data.nombre,
-          slug: data.slug,
-          descripcion: data.descripcion,
-          destacada: data.destacada,
-          imagen_banner: undefined, // El input file inicia vacío
-          imagen_logo: undefined, // El input file inicia vacío
-        });
+        if (data) {
+          // Guardamos las URLs originales en los estados de forma segura
+          setUrlImagenBannerOriginal(data.imagen_banner || null);
+          setUrlImagenLogoOriginal(data.imagen_logo || null);
+          // Seteamos el formulario usando la data directa de la API
+          form.reset({
+            nombre: data.nombre || "",
+            slug: data.slug || "",
+            descripcion: data.descripcion || "",
+            destacada: !!data.destacada,
+            imagen_banner: undefined,
+            imagen_logo: undefined,
+          });
+        }
       } catch (error) {
         console.error("Error al cargar la marca:", error);
       } finally {
@@ -109,14 +112,30 @@ export const useMarcaForm = ({
     };
 
     cargarMarca();
-  }, [marcaId, isEdit]);
+  }, [marcaId, isEdit, isModalOpen, form]);
+
+  // Efecto para limpiar el formulario cuando se cierra el modal
+  useEffect(() => {
+    if (!isModalOpen) {
+      form.reset({
+        nombre: "",
+        slug: "",
+        descripcion: "",
+        destacada: false,
+        imagen_banner: undefined,
+        imagen_logo: undefined,
+      });
+      setUrlImagenBannerOriginal(null);
+      setUrlImagenLogoOriginal(null);
+    }
+  }, [isModalOpen, form]);
 
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
     try {
       let finalBannerUrl = urlImagenBannerOriginal;
       let finalLogoUrl = urlImagenLogoOriginal;
-      // Si el usuario subió una nueva imagen, la subimos a Supabase y obtenemos la URL
+      // Subida condicionada de Banner
       if (data.imagen_banner && data.imagen_banner.length > 0) {
         const urlSubida = await upLoadImage(
           data.imagen_banner[0],
@@ -125,7 +144,7 @@ export const useMarcaForm = ({
         );
         if (urlSubida) finalBannerUrl = urlSubida;
       }
-      // Si el usuario subió una nueva imagen, la subimos a Supabase y obtenemos la URL
+      // Subida condicionada de Logo
       if (data.imagen_logo && data.imagen_logo.length > 0) {
         const urlSubida = await upLoadImage(
           data.imagen_logo[0],
@@ -134,16 +153,16 @@ export const useMarcaForm = ({
         );
         if (urlSubida) finalLogoUrl = urlSubida;
       }
-      // Construimos el objeto final a enviar al backend
+      // Payload limpio para prevenir el Error 500 del Servidor
       const payload = {
         nombre: data.nombre,
         slug: data.slug,
-        descripcion: data.descripcion,
+        descripcion: data.descripcion || "",
         destacada: !!data.destacada,
-        imagen_banner: finalBannerUrl,
-        imagen_logo: finalLogoUrl,
+        imagen_banner: finalBannerUrl || "", // Reemplaza null por string vacío si tu BD es estricta
+        imagen_logo: finalLogoUrl || "",
       };
-      // Lógica para crear o actualizar según el modo
+
       if (isEdit && marcaId) {
         await updateMarca(Number(marcaId), payload);
         alert("¡Marca actualizada con éxito!");
@@ -151,7 +170,8 @@ export const useMarcaForm = ({
         await createMarca(payload);
         alert("¡Marca creada con éxito!");
       }
-      // Llamamos al callback de éxito para cerrar el modal o refrescar la lista
+
+      setIsModalOpen(false); // Cierre exitoso controlado aquí
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error al guardar la marca:", error);
@@ -161,11 +181,18 @@ export const useMarcaForm = ({
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    if (e) e.stopPropagation(); // Detiene la propagación del evento para evitar cierres no deseados del modal
+    if (e) e.stopPropagation(); // Prevenimos la propagación del evento para evitar cierres no deseados del modal
     e.preventDefault();
     form.handleSubmit(onSubmit)();
-    setIsModalOpen(false); // Cerramos el modal después de enviar el formulario
   };
 
-  return { form, handleSubmit, loading, isModalOpen, setIsModalOpen };
+  return {
+    form,
+    handleSubmit,
+    loading,
+    isModalOpen,
+    setIsModalOpen,
+    urlImagenBannerOriginal,
+    urlImagenLogoOriginal,
+  };
 };
