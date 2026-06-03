@@ -58,6 +58,7 @@ export const useMarcaForm = ({
   onSuccess,
 }: UseMarcaFormProps) => {
   const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [urlImagenBannerOriginal, setUrlImagenBannerOriginal] = useState<
     string | null
   >(null);
@@ -159,5 +160,12 @@ export const useMarcaForm = ({
     }
   };
 
-  return { form, onSubmit, loading };
+  const handleSubmit = (e: React.FormEvent) => {
+    if (e) e.stopPropagation(); // Detiene la propagación del evento para evitar cierres no deseados del modal
+    e.preventDefault();
+    form.handleSubmit(onSubmit)();
+    setIsModalOpen(false); // Cerramos el modal después de enviar el formulario
+  };
+
+  return { form, handleSubmit, loading, isModalOpen, setIsModalOpen };
 };

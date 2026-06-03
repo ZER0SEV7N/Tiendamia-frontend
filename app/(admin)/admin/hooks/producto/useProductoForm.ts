@@ -189,18 +189,29 @@ export const useProductoForm = ({
     }
   }, [hijaIdSeleccionada]);
 
+  const cargarMarcas = async () => {
+    try {
+      const resMarcas = await getMarcas();
+      setMarcas(resMarcas.data || []);
+    } catch (error) {
+      console.error("Error al refrescar las marcas:", error);
+    }
+  };
+
   useEffect(() => {
     const cargarTodo = async () => {
       try {
         setIsLoading(true);
+        // Ejecutamos ambas peticiones en paralelo de forma limpia
         const [resCats, resMarcas] = await Promise.all([
           getAllCategorias(),
           getMarcas(),
         ]);
+        // Seteamos los estados correspondientes con las respuestas
         const cats = resCats.data || [];
         setCategoriasData(cats);
         setMarcas(resMarcas.data || []);
-
+        // Si es modo edición, procesamos el detalle del producto
         if (isEdit && productoId) {
           const productoDetalle = await getProductoById(productoId);
 
@@ -261,7 +272,6 @@ export const useProductoForm = ({
                     precio: v.precio,
                     stock: v.stock,
                     isNewInDb: false,
-                    // CORRECCIÓN: Adaptamos cualquier variación del backend al tipado estricto
                     caracteristicas: v.caracteristicas
                       ? v.caracteristicas.map((c: any) => ({
                           atributoNombre: c.atributoNombre || c.atributo || "",
@@ -428,6 +438,7 @@ export const useProductoForm = ({
   return {
     form,
     onSubmit: submitHandler,
+    cargarMarcas,
     isLoading,
     marcas,
     opcionesPadre,
