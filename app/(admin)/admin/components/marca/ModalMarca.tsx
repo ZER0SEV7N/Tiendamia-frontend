@@ -23,6 +23,7 @@ import { Marca } from "@/types/marca/marca";
 
 interface ModalMarcaProps {
   icons: React.ReactNode;
+  title?: string;
   props?: string;
   marcaId?: string;
   isEdit: boolean;
@@ -32,6 +33,7 @@ interface ModalMarcaProps {
 function ModalMarca({
   icons,
   props,
+  title,
   isEdit = false,
   marcaId,
   onSuccessData,
@@ -51,7 +53,10 @@ function ModalMarca({
 
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <DialogTrigger className={props}>{icons}</DialogTrigger>
+      <DialogTrigger className={props}>
+        {title}
+        {icons}
+      </DialogTrigger>
       <DialogContent className="sm:max-w-150 p-0 overflow-hidden">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>{isEdit ? "Editar Marca" : "Crear Marca"}</DialogTitle>

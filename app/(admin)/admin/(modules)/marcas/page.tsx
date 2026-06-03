@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { DataTable } from "../../components/table/data-table";
 import { Plus } from "lucide-react";
 import { useTableMarca } from "../../hooks/marca/useTableMarca";
 import { useFilterMarca } from "../../hooks/marca/useFilterMarca";
 import FiltrosMarca from "../../components/marca/FiltrosMarca";
+import ModalMarca from "../../components/marca/ModalMarca";
+import { DataTable } from "../../components/Table/data-table";
 
 function Page() {
   const {
@@ -35,11 +35,12 @@ function Page() {
             filtrado en tu inventario.
           </p>
         </div>
-
-        {/* Aquí puedes envolver este botón con tu <DialogTrigger> del Modal de Marca */}
-        <Button className="bg-[#FF3C3C] hover:bg-[#E03030] text-white font-bold h-10 px-6 rounded-xl transition-colors shadow-sm shadow-red-100 cursor-pointer">
-          Agregar Marca <Plus className="h-4 w-4 ml-2" />
-        </Button>
+        <ModalMarca
+          isEdit={false}
+          props="flex justify-center items-center bg-[#FF3C3C] hover:bg-[#E03030] text-white font-bold h-10 px-6 rounded-xl transition-colors shadow-sm shadow-red-100 cursor-pointer"
+          icons={<Plus className="h-4 w-4 ml-2" />}
+          title="Agregar Marca"
+        />
       </div>
 
       {/* BLOQUE DE FILTROS HORIZONTALES */}
