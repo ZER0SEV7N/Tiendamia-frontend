@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getMarcas } from "@/services/marca";
+import { getMarcas } from "@/lib/services/marca";
 import { Marca } from "@/types/marca/marca";
 import { useState, useMemo, useEffect } from "react";
 

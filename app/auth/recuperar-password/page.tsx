@@ -1,26 +1,31 @@
+//app/auth/recuperar-password/page.tsx
+//Página para solicitar recuperación de contraseña,
+//donde el usuario ingresa su email, y se le envía un enlace para restablecer su contraseña.
+
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
-import { solicitarRecuperacion } from "@/lib/auth";
+import { solicitarRecuperacion } from "@/lib/services/password";
 
 export default function RecuperarPasswordPage() {
   const [correo, setCorreo] = useState("");
   const [enviado, setEnviado] = useState(false);
   const [error, setError] = useState("");
-  const [cargando, setCargando] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  //Funcion para manejar el submit del formulario de recuperación de contraseña
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    setCargando(true);
+    setLoading(true);
     try {
       await solicitarRecuperacion(correo);
       setEnviado(true);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Error al enviar el correo");
     } finally {
-      setCargando(false);
+      setLoading(false);
     }
   };
 
@@ -69,10 +74,10 @@ export default function RecuperarPasswordPage() {
 
         <button
           type="submit"
-          disabled={cargando}
+          disabled={loading}
           className="w-full bg-[#FF3C3C] hover:bg-[#e53030] text-white font-medium py-2.5 rounded text-sm transition disabled:opacity-60"
         >
-          {cargando ? "Enviando..." : "Enviarme enlace"}
+          {loading ? "Enviando..." : "Enviarme enlace"}
         </button>
       </form>
 

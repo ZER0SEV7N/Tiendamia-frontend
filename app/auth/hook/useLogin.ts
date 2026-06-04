@@ -13,27 +13,44 @@ export function useLogin() {
     const [correo, setCorreo] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const [cargando, setCargando] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [captchaChecked, setCaptchaChecked] = useState(false);
 
     //Funcion para manejar el submit del formulario de login
     const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
         
+        //Che sos un robot?
         if (!captchaChecked) {
             setError("Por favor verifica que no eres un robot.");
             return;
         }
 
         setError("");
-        setCargando(true);
+        setLoading(true);
 
+        //Login
         try {
-            await login(correo, password);
-            if (typeof sincronizarCarrito === 'function') 
-                await sincronizarCarrito();
-    
-            router.push("/");
+            const userdata = await login(correo, password);
+
+            //Redirigir segun rol
+            const rol = typeof userdata?.rol === "string" 
+            ? userdata.rol 
+            : (userdata?.rol as any)?.nombre;
+
+            switch (rol?.toUpperCase()) {
+                case "ADMIN":
+                    router.push("/admin/dashboard");
+                    break;
+                case "USER": 
+                    if (typeof sincronizarCarrito === 'function') {
+                        await sincronizarCarrito();
+                    }
+                    router.push("/");
+                    break;
+                default:
+                    setError("Rol de usuario desconocido: " + rol);
+            }
 
         } catch (err: unknown) {
             if (err instanceof Error) {
@@ -42,10 +59,11 @@ export function useLogin() {
                 setError("Error al iniciar sesión");
             }
         } finally {
-            setCargando(false);
+            setLoading(false);
         }
     }
 
+    //Retorno de estados y funciones para el componente de login
     return {
         correo,
         setCorreo,
@@ -53,7 +71,7 @@ export function useLogin() {
         setPassword,
         error,
         setError,
-        cargando,
+        loading,
         captchaChecked,
         setCaptchaChecked,
         handleSubmit,

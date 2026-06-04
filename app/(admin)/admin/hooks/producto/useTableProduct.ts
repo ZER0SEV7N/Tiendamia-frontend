@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { cambiarEstado } from "@/services/producto";
+import { cambiarEstado } from "@/lib/services/producto";
 import { ProductoList } from "@/types/producto/productoList";
 import { ColumnsProducto } from "../../components/producto/Colums-Producto";
 

@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const { 
     correo, setCorreo, password, setPassword, 
-    error, setError, cargando, captchaChecked, setCaptchaChecked, 
+    error, setError, loading, captchaChecked, setCaptchaChecked, 
     handleSubmit, loginConGoogle 
   } = useLogin();
   
@@ -146,10 +146,10 @@ export default function LoginPage() {
         {/* Boton ingresar */}
         <button
           type="submit"
-          disabled={cargando}
+          disabled={loading}
           className="w-full bg-[#FF3C3C] hover:bg-[#e53030] text-white font-medium py-2.5 rounded text-sm transition disabled:opacity-60"
         >
-          {cargando ? "Ingresando..." : "Ingresar"}
+          {loading ? "Ingresando..." : "Ingresar"}
         </button>
       </form>
 

@@ -5,7 +5,6 @@
 import { Geist, Geist_Mono, Mulish } from "next/font/google";
 import "@/app/globals.css";
 import Link from "next/link";
-import { AuthProvider } from "@/context/context";
 import { Providers } from "@/components/public/layouts/Providers";
 
 const geistSans = Geist({

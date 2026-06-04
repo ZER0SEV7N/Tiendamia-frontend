@@ -10,8 +10,8 @@ import {
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { getAllCategorias } from "@/services/categoria";
-import { getMarcas } from "@/services/marca";
+import { getAllCategorias } from "@/lib/services/categoria";
+import { getMarcas } from "@/lib/services/marca";
 import { Categoria } from "@/types/categoria/categoria";
 import { ProductoRequest } from "@/types/producto/productoList"; // Asegúrate de que apunte a tus tipos nuevos
 import { Marca } from "@/types/marca/marca";
@@ -22,7 +22,7 @@ import {
   updateProducto,
   createVariacion,
   updateVariacion,
-} from "@/services/producto";
+} from "@/lib/services/producto";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = [

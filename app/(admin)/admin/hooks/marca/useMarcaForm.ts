@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable react-hooks/exhaustive-deps */
-import { getByIdMarca, createMarca, updateMarca } from "@/services/marca";
+import { getByIdMarca, createMarca, updateMarca } from "@/lib/services/marca";
 import { useEffect, useState } from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";

@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { getAllCategorias } from "@/services/categoria";
-import { getProductos } from "@/services/producto";
+import { getAllCategorias } from "@/lib/services/categoria";
+import { getProductos } from "@/lib/services/producto";
 import { Categoria } from "@/types/categoria/categoria";
 import { ProductoList } from "@/types/producto/productoList";
 import { useState, useMemo, useEffect } from "react";

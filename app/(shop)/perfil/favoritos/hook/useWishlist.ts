@@ -5,7 +5,7 @@ import {
   getWishlist,
   eliminarDeWishlist,
   agregarAWishlist,
-} from "@/services/wishlist";
+} from "@/lib/services/wishlist";
 import { WishlistItem } from "@/app/(shop)/perfil/favoritos/types/wishlist";
 
 export const useWishlist = () => {

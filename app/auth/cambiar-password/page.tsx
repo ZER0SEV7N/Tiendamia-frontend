@@ -1,10 +1,15 @@
+//app/auth/cambiar-password/page.tsx
+//Página para cambiar la contraseña, 
+//accedida desde el enlace enviado al correo. 
+//Recibe el token por query, y permite ingresar una nueva contraseña, 
+//confirmarla, y mostrar errores o éxito.
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-import { cambiarPassword } from "@/lib/auth";
+import { cambiarPassword } from "@/lib/services/password";
 
 function CambiarPasswordForm() {
   const searchParams = useSearchParams();
@@ -22,18 +27,22 @@ function CambiarPasswordForm() {
     if (!token) setError("Token inválido. Solicita un nuevo enlace de recuperación.");
   }, [token]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  //Funcion para manejar el submit del formulario de cambio de contraseña
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     if (password !== confirmar) {
       setError("Las contraseñas no coinciden");
       return;
     }
+
     if (password.length < 6) {
       setError("La contraseña debe tener al menos 6 caracteres");
       return;
     }
+
     setCargando(true);
+
     try {
       await cambiarPassword(token, password);
       setExito(true);
@@ -45,6 +54,7 @@ function CambiarPasswordForm() {
     }
   };
 
+  //Si el cambio fue exitoso, mostrar mensaje de éxito y redirigir al login
   if (exito) {
     return (
       <div className="flex justify-center py-16 px-4">
