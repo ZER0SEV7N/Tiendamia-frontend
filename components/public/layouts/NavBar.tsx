@@ -116,7 +116,7 @@ function NavBar() {
                   {/* COMPONENTE OFICIAL DE GOOGLE */}
                   <div className="w-full flex justify-center py-1">
                     <GoogleLogin
-                      width="100%"
+                      width="200"
                       theme="outline"
                       size="medium" // Tamaño un poco más pequeño para el menú
                       text="signin_with"

@@ -30,7 +30,7 @@ export default function LoginPage() {
 
       <div className="w-full flex justify-center mb-4">
         <GoogleLogin
-          width="100%"
+          width="300"
           theme="outline"
           size="large"
           text="signin_with"

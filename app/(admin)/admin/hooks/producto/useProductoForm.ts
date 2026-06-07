@@ -213,7 +213,7 @@ export const useProductoForm = ({
         setMarcas(resMarcas.data || []);
         // Si es modo edición, procesamos el detalle del producto
         if (isEdit && productoId) {
-          const productoDetalle = await getProductoById(productoId);
+          const productoDetalle = await getProductoById(Number(productoId));
 
           if (productoDetalle) {
             setUrlImagenMaestraOriginal(productoDetalle.imagenUrl || "");

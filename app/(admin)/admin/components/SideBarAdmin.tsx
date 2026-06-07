@@ -28,7 +28,7 @@ function SideBarAdmin() {
 
   const handleLogout = () => {
     logout();
-    router.push("/admin/auth/login");
+    router.push("/");
   };
 
   // Rutas

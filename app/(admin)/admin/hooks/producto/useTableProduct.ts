@@ -21,7 +21,7 @@ export const useTableProduct = ({ setProductos }: UseTableProductProps) => {
 
   const handleStatusChange = async (id: number, nuevoEstado: boolean) => {
     try {
-      await cambiarEstado(id, nuevoEstado);
+      await cambiarEstado(id);
       setProductos((prevProductos) =>
         prevProductos.map((p) =>
           p.id === id ? { ...p, estado: nuevoEstado } : p,

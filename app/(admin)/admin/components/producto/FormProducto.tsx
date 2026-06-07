@@ -295,7 +295,7 @@ export const ProductoForm = ({
                         icons={<Plus className="h-4 w-4" />}
                         isEdit={false}
                         props="h-10 px-3 border-dashed border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900 shrink-0"
-                        onSuccess={cargarMarcas}
+                        onSuccessData={cargarMarcas}
                       />
                     </div>
                     <FormMessage />
