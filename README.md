@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🛒 Tiendamia Clone - Front End Web
 
-## Getting Started
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white) ![JavaScript](https://img.shields.io/badge/javascript-%23F7DF1E.svg?style=for-the-badge&logo=javascript&logoColor=black)
 
-First, run the development server:
+Este repositorio contiene el código fuente del **Front End** para el clon de la plataforma de e-commerce Tiendamia. Está diseñado para ofrecer una experiencia de usuario (UX) fluida e interactiva, consumiendo de manera eficiente los recursos de nuestra API RESTful en Spring Boot.
 
+## 🎯 Objetivo del Proyecto
+El propósito de esta capa cliente es replicar el flujo de navegación y compra de un e-commerce moderno. Permite a los usuarios explorar el catálogo de productos, gestionar su carrito de compras y completar el proceso de simulación de órdenes, garantizando una interfaz responsiva y un rendimiento optimizado en el navegador.
+
+## 🏗️ Arquitectura y Separación de Lógica
+Para asegurar que el código sea lo más accesible, mantenible y legible posible a medida que el proyecto escala, se ha implementado una estricta separación de responsabilidades en el árbol de directorios:
+
+* **`components/`**: Contiene los bloques de construcción visuales de la interfaz (botones, tarjetas de productos, modales). Son reutilizables y agnósticos al contexto global.
+* **`hooks/`**: Encapsula la lógica de estado complejo y los efectos secundarios, manteniendo a los componentes limpios y enfocados únicamente en el renderizado de la vista.
+* **`services/`**: Capa dedicada exclusivamente a las peticiones HTTP hacia el Back End. Centraliza la comunicación con la API, de modo que si un endpoint cambia, solo se actualiza este archivo.
+* **`json/` (y utilidades):** Archivos estáticos de configuración y datos simulados (mocks) que permiten agilizar el maquetado sin depender de respuestas en tiempo real del servidor.
+
+## 🤝 Colaboración y Gestión (Git + Jira)
+El equipo de desarrollo mantiene una trazabilidad completa y un flujo de trabajo ordenado, sincronizado con el Back End:
+
+* La planificación de *features* visuales y flujos de usuario se administra en **Jira** mediante Sprints.
+* Cada desarrollador utiliza **ramas independientes** para maquetar interfaces o integrar endpoints sin afectar el trabajo del resto.
+* La rama **`scrum`** actúa como el entorno de prueba general (Staging). Aquí se resuelven los conflictos de UI y se realizan pruebas de integración antes de fusionar el código final en **`master`**.
+* Cada *commit* incluye la referencia al ticket de Jira para documentar el motivo técnico o de negocio detrás del cambio.
+
+## 🚀 Requisitos e Instalación
+
+1. Clonar el repositorio:
+   ```bash
+   git clone [https://github.com/ZER0SEV7N/Tiendamia-frontend.git](https://github.com/ZER0SEV7N/Tiendamia-frontend.git)
+   ```
+
+2. Instalar las dependencias del ecosistema de Node:
+ ```bash
+ npm install
+ ```
+3. Configurar las variables de entorno. Crea un archivo .env en la raíz del proyecto para definir la URL base del backend (ej. VITE_API_URL=http://localhost:8080).
+
+4. Levantar el servidor de desarrollo local:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. La aplicación estará disponible en tu navegador local (usualmente en el puerto 3000 o 5173).
